@@ -37,7 +37,7 @@ internal static partial class DebugOverlay
 			}
 
 			var rows = entries
-				.Select( (entry, index) => (
+				.Select( ( entry, index ) => (
 					Name: entry.Name,
 					LastMs: entry.DurationMs,
 					SmoothMs: GpuProfilerStats.GetSmoothedDuration( entry.Name ),
