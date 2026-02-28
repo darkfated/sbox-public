@@ -18,6 +18,15 @@ internal static partial class DebugOverlay
 			new Color( 1.0f, 0.5f, 0.8f ),   // Pink
 		};
 
+		private static readonly TextRendering.Outline Outline = new() { Color = Color.Black.WithAlpha( 0.8f ), Size = 2, Enabled = true };
+
+		private const float RowHeight = 14f;
+		private const float NameWidth = 170f;
+		private const float GaugeWidth = 120f;
+		private const float ValueWidth = 74f;
+		private const int MaxRows = 20;
+		private const float MinVisibleMs = 0.02f;
+
 		internal static void Draw( ref Vector2 pos )
 		{
 			var entries = GpuProfilerStats.Entries;
@@ -27,91 +36,98 @@ internal static partial class DebugOverlay
 				return;
 			}
 
-			float labelWidth = 140;
-			float height = 14;
-			float y = pos.y;
-			var left = pos.x;
-			var mul = 200 / 16.0f; // Scale: 16ms = 200px
-
-			// Draw header
-			var headerRect = new Rect( left, y, 400, height );
-			var headerScope = new TextRendering.Scope( "GPU Timings", Color.White, 12, "Roboto Mono", 700 )
-			{
-				Outline = new TextRendering.Outline { Color = Color.Black, Size = 3, Enabled = true }
-			};
-			Hud.DrawText( headerScope, headerRect, TextFlag.LeftCenter );
-			y += height + 4;
-
-			// Draw total
-			float totalMs = GpuProfilerStats.TotalGpuTimeMs;
-			var totalRect = new Rect( left, y, 400, height );
-			var totalScope = new TextRendering.Scope( $"Total: {totalMs:F2}ms ({1000f / MathF.Max( totalMs, 0.001f ):F0} fps max)",
-				totalMs > 16.67f ? new Color( 1f, 0.5f, 0.3f ) : Color.White.WithAlpha( 0.9f ), 11, "Roboto Mono", 600 )
-			{
-				Outline = new TextRendering.Outline { Color = Color.Black, Size = 2, Enabled = true }
-			};
-			Hud.DrawText( totalScope, totalRect, TextFlag.LeftCenter );
-			y += height + 6;
-
-			// Sort entries by smoothed duration (descending)
-			var sortedEntries = entries
-				.Select( ( entry, index ) => (entry, index, smoothed: GpuProfilerStats.GetSmoothedDuration( entry.Name )) )
-				.OrderByDescending( x => x.smoothed )
+			var rows = entries
+				.Select( (entry, index) => (
+					Name: entry.Name,
+					LastMs: entry.DurationMs,
+					SmoothMs: GpuProfilerStats.GetSmoothedDuration( entry.Name ),
+					Color: PassColors[index % PassColors.Length]
+				) )
+				.Where( x => x.SmoothMs >= MinVisibleMs && !x.Name.StartsWith( "Managed:" ) )
+				.OrderByDescending( x => x.SmoothMs )
+				.Take( MaxRows )
 				.ToList();
 
-			// Draw each entry
-			for ( int i = 0; i < sortedEntries.Count; i++ )
+			if ( rows.Count == 0 )
 			{
-				var (entry, originalIndex, smoothedDuration) = sortedEntries[i];
-				var color = PassColors[originalIndex % PassColors.Length];
+				DrawNoData( ref pos );
+				return;
+			}
 
-				// Too irrelevant, skip
-				if ( smoothedDuration < 0.02 )
-					continue;
+			var totalMs = MathF.Max( GpuProfilerStats.TotalGpuTimeMs, 0.001f );
+			var scaleMs = MathF.Max( totalMs, rows.Max( x => x.SmoothMs ) );
 
-				// Clean up managed marker names for display, we still need to collect them from native side otherwise it'll redundantly add timings to the next in list
-				if ( entry.Name.StartsWith( "Managed:" ) )
-					continue;
+			var x = pos.x;
+			var y = pos.y;
+			var colName = x;
+			var colGauge = colName + NameWidth + 8;
+			var colLast = colGauge + GaugeWidth + 10;
+			var colSmooth = colLast + ValueWidth;
+			var colShare = colSmooth + ValueWidth;
 
-				var rowRect = new Rect( left, y, 500, height );
+			DrawSummary( ref y, x, totalMs, rows.Count );
+			DrawHeader( ref y, colName, colLast, colSmooth, colShare );
 
-				// Draw label
-				var labelScope = new TextRendering.Scope( entry.Name, color.Lighten( 0.5f ), 11, "Roboto Mono", 600 )
-				{
-					Outline = new TextRendering.Outline { Color = Color.Black, Size = 2, Enabled = true }
-				};
-				Hud.DrawText( labelScope, rowRect with { Width = labelWidth }, TextFlag.RightCenter );
-
-				// Draw bar
-				var barRect = rowRect with { Left = left + labelWidth + 8 };
-				var barWidth = MathF.Max( smoothedDuration * mul, 2 );
-
-				Hud.DrawRect( (barRect with { Width = entry.DurationMs * mul }).Shrink( 1 ), color.WithAlpha( 0.8f ), cornerRadius: new Vector4( 2 ) );
-				Hud.DrawRect( barRect with { Width = barWidth }, color.WithAlpha( 0.2f ), borderWidth: new Vector4( 1 ), borderColor: Color.Black, cornerRadius: new Vector4( 2 ) );
-
-				// Draw duration text
-				var textRect = barRect with { Left = left + labelWidth + 16 + barWidth };
-				var durationScope = new TextRendering.Scope( $"{entry.DurationMs:F2}ms", color.Lighten( 0.5f ), 11, "Roboto Mono", 600 )
-				{
-					Outline = new TextRendering.Outline { Color = Color.Black.WithAlpha( 0.8f ), Size = 2, Enabled = true }
-				};
-				Hud.DrawText( durationScope, textRect, TextFlag.LeftCenter );
-
-				y += height + 2;
+			foreach ( var row in rows )
+			{
+				DrawRow( ref y, row, totalMs, scaleMs, colName, colGauge, colLast, colSmooth, colShare );
 			}
 
 			pos.y = y;
 		}
 
+		private static void DrawSummary( ref float y, float x, float totalMs, int shownRows )
+		{
+			var fpsMax = 1000f / totalMs;
+			var color = totalMs > 16.67f ? new Color( 1f, 0.65f, 0.35f ) : Color.White.WithAlpha( 0.9f );
+			var scope = new TextRendering.Scope( $"GPU total {totalMs:F2}ms  ({fpsMax:F0} fps max)  shown {shownRows}", color, 11, "Roboto Mono", 700 ) { Outline = Outline };
+			Hud.DrawText( scope, new Rect( x, y, 560, RowHeight ), TextFlag.LeftCenter );
+			y += RowHeight;
+		}
+
+		private static void DrawHeader( ref float y, float colName, float colLast, float colSmooth, float colShare )
+		{
+			var dim = Color.White.WithAlpha( 0.55f );
+			DrawCell( "pass", dim, colName, y, NameWidth, TextFlag.LeftCenter );
+			DrawCell( "last", dim, colLast, y, ValueWidth, TextFlag.LeftCenter );
+			DrawCell( "avg", dim, colSmooth, y, ValueWidth, TextFlag.LeftCenter );
+			DrawCell( "% total", dim, colShare, y, ValueWidth, TextFlag.LeftCenter );
+			y += RowHeight;
+		}
+
+		private static void DrawRow( ref float y, (string Name, float LastMs, float SmoothMs, Color Color) row, float totalMs, float scaleMs, float colName, float colGauge, float colLast, float colSmooth, float colShare )
+		{
+			DrawCell( row.Name, row.Color.Lighten( 0.45f ), colName, y, NameWidth, TextFlag.LeftCenter );
+
+			var gauge = new Rect( colGauge, y + 2, GaugeWidth, RowHeight - 4 );
+			Hud.DrawRect( gauge, Color.Black.WithAlpha( 0.2f ), borderWidth: 1, borderColor: Color.White.WithAlpha( 0.08f ) );
+
+			var smoothW = MathF.Min( gauge.Width, (row.SmoothMs / scaleMs) * gauge.Width );
+			Hud.DrawRect( new Rect( gauge.Left, gauge.Top, MathF.Max( 1, smoothW ), gauge.Height ), row.Color.WithAlpha( 0.65f ) );
+
+			var lastX = gauge.Left + MathF.Min( gauge.Width, (row.LastMs / scaleMs) * gauge.Width );
+			Hud.DrawRect( new Rect( lastX, gauge.Top, 1, gauge.Height ), row.Color.Lighten( 0.2f ) );
+
+			var sharePct = (row.LastMs / totalMs) * 100f;
+			DrawCell( $"{row.LastMs:F2}ms", Color.White.WithAlpha( 0.85f ), colLast, y, ValueWidth, TextFlag.LeftCenter );
+			DrawCell( $"{row.SmoothMs:F2}ms", Color.White.WithAlpha( 0.7f ), colSmooth, y, ValueWidth, TextFlag.LeftCenter );
+			DrawCell( $"{sharePct:F1}%", Color.White.WithAlpha( 0.7f ), colShare, y, ValueWidth, TextFlag.LeftCenter );
+
+			y += RowHeight + 1;
+		}
+
+		private static void DrawCell( string text, Color color, float x, float y, float width, TextFlag flag )
+		{
+			var scope = new TextRendering.Scope( text, color, 11, "Roboto Mono", 600 ) { Outline = Outline };
+			Hud.DrawText( scope, new Rect( x, y, width, RowHeight ), flag );
+		}
+
 		private static void DrawNoData( ref Vector2 pos )
 		{
-			var rect = new Rect( pos, new Vector2( 300, 14 ) );
-			var scope = new TextRendering.Scope( "GPU Profiler: Waiting for data...", Color.White.WithAlpha( 0.6f ), 11, "Roboto Mono", 600 )
-			{
-				Outline = new TextRendering.Outline { Color = Color.Black, Size = 2, Enabled = true }
-			};
-			Hud.DrawText( scope, rect, TextFlag.LeftCenter );
-			pos.y += rect.Height;
+			var scope = new TextRendering.Scope( "GPU profiler: waiting for data...", Color.White.WithAlpha( 0.6f ), 11, "Roboto Mono", 600 ) { Outline = Outline };
+			Hud.DrawText( scope, new Rect( pos, new Vector2( 320, RowHeight ) ), TextFlag.LeftCenter );
+			pos.y += RowHeight;
 		}
+
 	}
 }
