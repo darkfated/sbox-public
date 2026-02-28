@@ -34,13 +34,24 @@ internal static partial class DebugOverlay
 
 			DrawHeader( ref y, x, colLast, colAvg, colMax );
 
-			foreach ( var t in timings.OrderByDescending( t => t.GetMetric( 256 ).Avg ) )
-			{
-				var last = t.GetMetric( 1 ).Avg;
-				var avg = t.GetMetric( 256 ).Avg;
-				var max = t.GetMetric( 256 ).Max;
+			var rows = timings
+				.Select( t =>
+				{
+					var lastMetric = t.GetMetric( 1 );
+					var windowMetric = t.GetMetric( 256 );
+					return (
+						Name: t.Name,
+						Color: t.Color,
+						Last: lastMetric.Avg,
+						Avg: windowMetric.Avg,
+						Max: windowMetric.Max
+					);
+				} )
+				.OrderByDescending( x => x.Avg );
 
-				DrawRow( ref y, t.Name, t.Color, colName, colGauge, colLast, colAvg, colMax, last, avg, max );
+			foreach ( var row in rows )
+			{
+				DrawRow( ref y, row.Name, row.Color, colName, colGauge, colLast, colAvg, colMax, row.Last, row.Avg, row.Max );
 			}
 
 			pos.y = y;
