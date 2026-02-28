@@ -18,7 +18,7 @@ internal static partial class DebugOverlay
 			new Color( 1.0f, 0.5f, 0.8f ),   // Pink
 		};
 
-		private static readonly TextRendering.Outline Outline = new() { Color = Color.Black.WithAlpha( 0.8f ), Size = 2, Enabled = true };
+		private static readonly TextRendering.Outline Outline = new() { Color = Color.Black, Size = 2, Enabled = true };
 
 		private const float RowHeight = 14f;
 		private const float NameWidth = 170f;
@@ -65,6 +65,7 @@ internal static partial class DebugOverlay
 			var colSmooth = colLast + ValueWidth;
 			var colShare = colSmooth + ValueWidth;
 
+			DrawTitle( ref y, x );
 			DrawSummary( ref y, x, totalMs, rows.Count );
 			DrawHeader( ref y, colName, colLast, colSmooth, colShare );
 
@@ -74,6 +75,13 @@ internal static partial class DebugOverlay
 			}
 
 			pos.y = y;
+		}
+
+		private static void DrawTitle( ref float y, float x )
+		{
+			var scope = new TextRendering.Scope( "GPU Timings", Color.White.WithAlpha( 0.9f ), 11, "Roboto Mono", 700 ) { Outline = Outline };
+			Hud.DrawText( scope, new Rect( x, y, 560, RowHeight ), TextFlag.LeftCenter );
+			y += RowHeight;
 		}
 
 		private static void DrawSummary( ref float y, float x, float totalMs, int shownRows )

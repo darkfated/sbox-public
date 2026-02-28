@@ -40,8 +40,10 @@ internal static partial class DebugOverlay
 			DrawSectionHeader( ref drawPos, "Render Stats" );
 			DrawGroupHeader( ref drawPos, "Workload" );
 			Row( ref drawPos, "Objects", f.ObjectsRendered, $"({f.BaseObjectDraws:N0} base, {f.AnimatableObjectDraws:N0} anim) in {f.RenderBatchDraws:N0} batchlists" );
+			if ( f.ObjectsFading > 0 ) Row( ref drawPos, "Objects Fading", f.ObjectsFading );
 			Row( ref drawPos, "Triangles", f.TrianglesRendered );
 			Row( ref drawPos, "Draw Calls", f.DrawCalls, $"{SafeRatio( f.TrianglesRendered, f.DrawCalls ):N0} tris/draw" );
+			Row( ref drawPos, "Display Lists", f.DisplayLists );
 			Row( ref drawPos, "Views", f.SceneViewsRendered );
 			Row( ref drawPos, "Resolves", f.RenderTargetResolves );
 
@@ -92,9 +94,9 @@ internal static partial class DebugOverlay
 			Hud.DrawText( scope, rect with { Width = 120 }, TextFlag.RightCenter );
 			scope.TextColor = color; scope.Text = $"last {lastMs:F2}ms";
 			Hud.DrawText( scope, rect with { Left = rect.Left + 128, Width = 88 }, TextFlag.LeftCenter );
-			scope.TextColor = Color.White.WithAlpha( 0.55f ); scope.Text = $"avg {avgMs:F2}ms";
+			scope.TextColor = Color.White.WithAlpha( 0.78f ); scope.Text = $"avg {avgMs:F2}ms";
 			Hud.DrawText( scope, rect with { Left = rect.Left + 224, Width = 92 }, TextFlag.LeftCenter );
-			scope.TextColor = Color.White.WithAlpha( 0.55f ); scope.Text = $"jit {rangeMs:F2}ms";
+			scope.TextColor = Color.White.WithAlpha( 0.78f ); scope.Text = $"jit {rangeMs:F2}ms";
 			Hud.DrawText( scope, rect with { Left = rect.Left + 326, Width = 96 }, TextFlag.LeftCenter );
 			scope.TextColor = Color.White.WithAlpha( 0.8f ); scope.Text = $"{fps} fps";
 			Hud.DrawText( scope, rect with { Left = rect.Left + 450, Width = 78 }, TextFlag.LeftCenter );
@@ -113,7 +115,7 @@ internal static partial class DebugOverlay
 		static void DrawGroupHeader( ref Vector2 pos, string label )
 		{
 			var rect = new Rect( pos, new Vector2( 512, 12 ) );
-			var scope = new TextRendering.Scope( label, Color.White.WithAlpha( 0.55f ), 10, "Roboto Mono", 700 ) { Outline = _outline };
+			var scope = new TextRendering.Scope( label, Color.White.WithAlpha( 0.78f ), 10, "Roboto Mono", 700 ) { Outline = _outline };
 			Hud.DrawText( scope, rect, TextFlag.LeftCenter );
 			pos.y += rect.Height;
 		}
@@ -128,7 +130,7 @@ internal static partial class DebugOverlay
 			Hud.DrawText( scope, rect with { Left = rect.Left + 128, Width = detail is null ? 420 : 90 }, TextFlag.LeftCenter );
 			if ( detail is not null )
 			{
-				scope.TextColor = Color.White.WithAlpha( 0.5f );
+				scope.TextColor = Color.White.WithAlpha( 0.75f );
 				scope.Text = detail;
 				Hud.DrawText( scope, rect with { Left = rect.Left + 228, Width = 320 }, TextFlag.LeftCenter );
 			}

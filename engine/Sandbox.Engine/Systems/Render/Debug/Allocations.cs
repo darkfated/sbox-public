@@ -111,7 +111,7 @@ internal static partial class DebugOverlay
 			{
 				Outline = new TextRendering.Outline { Color = Color.Black, Enabled = true, Size = 2 }
 			};
-			var dimScope = new TextRendering.Scope( "", Color.White.WithAlpha( 0.55f ), 10, "Roboto Mono", 600 )
+			var dimScope = new TextRendering.Scope( "", Color.White.WithAlpha( 0.78f ), 10, "Roboto Mono", 600 )
 			{
 				Outline = new TextRendering.Outline { Color = Color.Black, Enabled = true, Size = 2 }
 			};
@@ -127,18 +127,20 @@ internal static partial class DebugOverlay
 			var elapsedSecondsInt = (int)liveElapsed;
 			var windowLabel = elapsedSecondsInt >= 60 ? $"{elapsedSecondsInt / 60}m {elapsedSecondsInt % 60}s" : $"{elapsedSecondsInt}s";
 
-			headerScope.Text = $"Allocations ({windowLabel})";
+			headerScope.Text = $"GC Pauses (tracked for {windowLabel})";
 			Hud.DrawText( headerScope, new Rect( x, y, 512, 14 ), TextFlag.LeftTop );
 			y += 16;
 
-			DrawSummaryRow( x, ref y, scope, dimScope, "Gen (0/1/2)", $"{_gen0Sum + ls.Gc0} / {_gen1Sum + ls.Gc1} / {_gen2Sum + ls.Gc2}" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "Total Alloc", $"{mbTotal:N1} MB" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "Alloc Rate", $"{mbPerSec:N2} MB/s" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "GC Pause Avg", $"{avgMs:N2}ms" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "GC Pause Min/Max", $"{lowestPauseMs:N2}ms / {highestPauseMs:N2}ms" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "GC Pause Sum", $"{sumMs:N2}ms" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "Stutter Frames", $"{_stutterCount} (>{StutterThresholdTicks / TimeSpan.TicksPerMillisecond}ms)" );
-			DrawSummaryRow( x, ref y, scope, dimScope, "GC Time", $"{sumMs / (liveElapsed * 1000.0) * 100.0:N2}% (session {gcMemInfo.PauseTimePercentage:N2}%)" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Gen (0/1/2):", $"{_gen0Sum + ls.Gc0} / {_gen1Sum + ls.Gc1} / {_gen2Sum + ls.Gc2}" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Total:", $"{mbTotal:N1} MB" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Rate:", $"{mbPerSec:N2} MB/s" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Avg:", $"{avgMs:N2}ms" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Min:", $"{lowestPauseMs:N2}ms" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Max:", $"{highestPauseMs:N2}ms" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "Sum:", $"{sumMs:N2}ms" );
+			DrawSummaryRow( x, ref y, scope, dimScope, $"Frames with >{StutterThresholdTicks / TimeSpan.TicksPerMillisecond}ms GC:", $"{_stutterCount} frames" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "GC%:", $"{sumMs / (liveElapsed * 1000.0) * 100.0:N2}%" );
+			DrawSummaryRow( x, ref y, scope, dimScope, "GC% since process start:", $"{gcMemInfo.PauseTimePercentage:N2}%" );
 
 			y += 8;
 			headerScope.TextColor = new Color( 1f, 1f, 0.5f );

@@ -5,7 +5,7 @@ internal static partial class DebugOverlay
 	public partial class Profiler
 	{
 		static readonly Dictionary<string, float> _smoothedAvgWidth = new();
-		static readonly TextRendering.Outline _outline = new() { Color = Color.Black.WithAlpha( 0.8f ), Size = 2, Enabled = true };
+		static readonly TextRendering.Outline _outline = new() { Color = Color.Black, Size = 2, Enabled = true };
 
 		const float RowHeight = 14f;
 		const float NameWidth = 150f;
@@ -32,6 +32,7 @@ internal static partial class DebugOverlay
 			var colAvg = colLast + ValueWidth;
 			var colMax = colAvg + ValueWidth;
 
+			DrawTitle( ref y, x );
 			DrawHeader( ref y, x, colLast, colAvg, colMax );
 
 			var rows = timings
@@ -55,6 +56,13 @@ internal static partial class DebugOverlay
 			}
 
 			pos.y = y;
+		}
+
+		static void DrawTitle( ref float y, float x )
+		{
+			var scope = new TextRendering.Scope( "Profile Timings", Color.White.WithAlpha( 0.9f ), 11, "Roboto Mono", 700 ) { Outline = _outline };
+			Hud.DrawText( scope, new Rect( x, y, 420, RowHeight ), TextFlag.LeftCenter );
+			y += RowHeight;
 		}
 
 		static void DrawHeader( ref float y, float x, float colLast, float colAvg, float colMax )
