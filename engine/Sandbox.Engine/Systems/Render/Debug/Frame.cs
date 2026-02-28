@@ -39,7 +39,7 @@ internal static partial class DebugOverlay
 
 			DrawSectionHeader( ref drawPos, "Render Stats" );
 			DrawGroupHeader( ref drawPos, "Workload" );
-			Row( ref drawPos, "Objects", f.ObjectsRendered, $"({f.BaseObjectDraws:N0} base, {f.AnimatableObjectDraws:N0} anim)" );
+			Row( ref drawPos, "Objects", f.ObjectsRendered, $"({f.BaseObjectDraws:N0} base, {f.AnimatableObjectDraws:N0} anim) in {f.RenderBatchDraws:N0} batchlists" );
 			Row( ref drawPos, "Triangles", f.TrianglesRendered );
 			Row( ref drawPos, "Draw Calls", f.DrawCalls, $"{SafeRatio( f.TrianglesRendered, f.DrawCalls ):N0} tris/draw" );
 			Row( ref drawPos, "Views", f.SceneViewsRendered );
