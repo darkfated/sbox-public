@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Sandbox.UI;
 
@@ -69,8 +69,6 @@ public partial class TextEntry
 				b.UserData = r;
 			}
 		}
-
-		SyncTypedMatchSelection();
 	}
 
 	/// <summary>
@@ -101,7 +99,6 @@ public partial class TextEntry
 
 		Text = selected.UserData.ToString();
 		Label.MoveToLineEnd();
-		SyncTypedMatchSelection();
 	}
 
 	/// <summary>
@@ -111,34 +108,5 @@ public partial class TextEntry
 	{
 		Text = AutoCompletePanel.UserData.ToString();
 		DestroyAutoComplete();
-	}
-
-	void SyncTypedMatchSelection()
-	{
-		if ( !AutoCompletePanel.IsValid() )
-			return;
-
-		var typed = Text ?? string.Empty;
-		var hasTypedText = !string.IsNullOrWhiteSpace( typed );
-		Panel exactMatch = null;
-
-		foreach ( var child in AutoCompletePanel.Children )
-		{
-			child.SetClass( "typed-match", false );
-			if ( !hasTypedText )
-				continue;
-
-			var value = child.UserData?.ToString() ?? string.Empty;
-			if ( exactMatch == null && string.Equals( value, typed, StringComparison.OrdinalIgnoreCase ) )
-			{
-				exactMatch = child;
-			}
-		}
-
-		var bestMatch = exactMatch;
-		AutoCompletePanel.SelectedChild?.SetClass( "active", false );
-		AutoCompletePanel.SelectedChild = bestMatch;
-		AutoCompletePanel.SelectedChild?.SetClass( "active", true );
-		AutoCompletePanel.SelectedChild?.SetClass( "typed-match", true );
 	}
 }
