@@ -3,11 +3,13 @@
 consoleoverlay
 {
 	position: absolute;
-	left: 20px;
-	right: 20px;
-	top: 10px;
+	left: 16px;
+	right: 16px;
+	top: 12px;
 	font-family: Roboto Mono;
 	flex-direction: column;
+	pointer-events: none;
+	z-index: 60;
 
 	&.hidden
 	{
@@ -17,50 +19,74 @@ consoleoverlay
 	.output
 	{
 		flex-direction: column;
-		justify-content: flex-end;
+		align-items: flex-start;
 		overflow: hidden;
 		flex-grow: 1;
-
+		gap: 0;
 
 		ConsoleEntry
 		{
 			flex-shrink: 0;
-			cursor: pointer;
+			flex-direction: row;
+			align-items: center;
+			width: 100%;
+			max-width: 980px;
+			min-height: 24px;
+			padding: 0;
+			border-radius: 0;
+			border: 1px solid rgba( $default-border, 0.75 );
+			background-color: rgba( $default-950, 0.84 );
+			box-shadow: 0 4px 14px rgba( black, 0.28 );
 			color: #919aab;
+			pointer-events: auto;
+			overflow: hidden;
+			gap: 0;
 
 			label
 			{
-				text-shadow: 1px 1px 0px rgba( $default-950, 0.95 );
-				padding: 2px 10px;
+				padding: 3px 8px;
 				font-size: 10px;
 				font-weight: 600;
-				background-color: rgba( $default-950, 0.85 );
-				outline: 1px solid rgba( $default-border, 0.65 );
+				line-height: 14px;
+				text-shadow: none;
+				background-color: transparent;
 			}
 
 			.time
 			{
-				width: 88px;
-				min-width: 88px;
-				max-width: 88px;
+				width: 52px;
+				min-width: 52px;
+				max-width: 52px;
+				margin-left: 4px;
+				align-items: center;
 				justify-content: center;
+				padding: 0;
+				color: $default-200;
+				background-color: rgba( $default-800, 0.46 );
+				text-align: center;
 
 				> label
 				{
 					width: 100%;
 					text-align: center;
-					color: $default-200;
+					color: inherit;
+					padding: 3px 0;
 				}
 			}
 
 			.message > label
 			{
 				color: #919aab;
+				padding-left: 8px;
+				padding-right: 10px;
 			}
 
 			.message
 			{
 				color: #919aab;
+				flex-grow: 1;
+				min-width: 0;
+				white-space: nowrap;
 			}
 
 			&.Trace
@@ -82,12 +108,28 @@ consoleoverlay
 			&.Error
 			{
 				color: #ff6f7c;
+				background-color: rgba( #ff5a6a, 0.11 );
 
 				.message,
 				.message > label
 				{
 					color: #ff6f7c;
 				}
+			}
+
+			&.in
+			{
+				.message,
+				.message > label
+				{
+					color: $primary-blue;
+				}
+			}
+
+			&:hover
+			{
+				background-color: rgba( $default-900, 0.95 );
+				border-color: rgba( $default-border, 0.95 );
 			}
 		}
 	}
