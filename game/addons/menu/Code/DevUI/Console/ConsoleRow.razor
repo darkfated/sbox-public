@@ -20,7 +20,7 @@
 
     public Action<LogEvent> OnEntryClicked;
 
-    public string classes => $"consolerow {(selectedLine==this?"highlight":"")} {Event.Level.ToString()}";
+    public string classes => $"{(selectedLine==this?"highlight":"")} {Event.Level.ToString()} {(Event.Logger ?? "")}".Trim();
 
     internal void SetLogEvent(LogEvent e)
     {

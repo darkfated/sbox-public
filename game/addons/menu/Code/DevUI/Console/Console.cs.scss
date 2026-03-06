@@ -1,17 +1,20 @@
 
+@import '/styles/_Theme.scss';
+
 console
 {
 	font-family: Roboto Mono;
-	font-size: 11px;
+	font-size: 10px;
 	font-weight: normal;
+	position: relative;
 	flex-direction: column;
 	padding: 3px;
 	border-radius: 8px;
 	gap: 2px;
 	flex-grow: 1;
-	background-image: linear-gradient( to bottom, #111c, #000d );
-	backdrop-filter: blur( 5px );
-	font-size: 1rem;
+	background-image: linear-gradient( to bottom, rgba( $default-900, 0.9 ), rgba( $default-950, 0.95 ) );
+	backdrop-filter: blur( 8px );
+	outline: 1px solid $default-border;
 
 	.textentry
 	{
@@ -21,90 +24,115 @@ console
 	{
 		width: 100%;
 		height: 100%;
-		font-size: 11px;
-		font-weight: 600;
+		font-size: 10px;
+		font-weight: 500;
+		color: #919aab;
 	}
 
 	.input
 	{
-		background-color: rgba(42, 44, 47, 0.4);
+		background-color: rgba( $default-800, 0.85 );
+		border: 1px solid transparent;
+		border-radius: $rounding-small;
 		cursor: text;
 		flex-shrink: 0;
-		color: #68bf61;
-		opacity: 0.5;
+		color: $default-text;
+		overflow: hidden;
 		flex-grow: 1;
+		flex-basis: 0;
+		min-width: 180px;
+		min-height: 30px;
+		padding: 0 10px;
+
+		.prefix-label,
+		.suffix-label
+		{
+			display: none;
+		}
 
 		&:active, &:focus, &:hover
 		{
-			opacity: 1;
+			border-color: rgba( $primary-blue, 0.45 );
 		}
 	}
 
 	.toolbar
 	{
-		font-family: Roboto;
-		gap: 3px;
+		font-family: $font-default;
+		align-items: center;
+		gap: 8px;
+		padding: 4px;
+		width: 100%;
 
 		.scroll
 		{
-			background-color: rgba(#ccc, 0.1);
-			padding: 0px 10px;
+			background-color: rgba( $default-500, 0.08 );
+			padding: 0px 12px;
 			flex-shrink: 1;
 			justify-content: center;
 			align-items: center;
 			font-weight: lighter;
-			font-size: 16px;
+			font-size: 15px;
 			white-space: nowrap;
-			color: #999;
+			color: $default-200;
+			min-height: 30px;
+			border-radius: $rounding-small;
 
 			&.active
 			{
-				color: #ccc;
+				color: $default-text;
 			}
 		}
 
 		Button
 		{
-			font-family: Poppins;
-			background-color: rgba(#ccc, 0.1);
-			color: #ccc;
-			padding: 0px 10px;
+			font-family: $font-default;
+			background-color: rgba( $default-500, 0.08 );
+			color: $default-100;
+			border: 1px solid transparent;
+			border-radius: $rounding-small;
+			padding: 0px 14px;
 			flex-shrink: 1;
 			justify-content: center;
 			align-items: center;
-			font-weight: 600;
+			font-weight: 500;
 			white-space: nowrap;
 			min-width: 40px;
+			min-height: 32px;
 			cursor: pointer;
 			gap: 5px;
 
 			&.active
 			{
-				background-color: #3967c7;
-				color: #fff;
+				background-color: rgba( $primary-blue, 0.25 );
+				border-color: rgba( $primary-blue, 0.45 );
+				color: $default-text;
 			}
 		}
 
 		.type
 		{
-			background-color: rgba(104, 125, 104, 0.1);
-			color: #687d68;
+			background-color: rgba( $default-700, 0.25 );
+			color: $default-200;
 			flex-shrink: 1;
 			justify-content: center;
 			align-items: center;
 			white-space: nowrap;
-			width: 40px;
+			width: 58px;
+			min-width: 58px;
+			min-height: 32px;
+			font-weight: 600;
 
 			&.err
 			{
-				color: #c66;
-				background-color: rgba(204, 102, 102, 0.1);
+				color: #ff6f7c;
+				background-color: rgba( #ff5a6a, 0.14 );
 			}
 
 			&.wrn
 			{
-				color: #de935f;
-				background-color: rgba(222, 147, 95, 0.1);
+				color: #ffd75d;
+				background-color: rgba( #ffd75d, 0.16 );
 			}
 
 			&.disabled
@@ -115,17 +143,79 @@ console
 
 		.filter
 		{
-			background-color: rgba(42, 44, 47, 0.4);
+			background-color: rgba( $default-800, 0.85 );
+			border: 1px solid transparent;
+			border-radius: $rounding-small;
 			cursor: text;
 			flex-shrink: 0;
-			color: #777;
+			color: $default-100;
 			flex-grow: 0;
-			min-width: 200px;
-			opacity: 0.5;
+			min-width: 160px;
+			max-width: 210px;
+			overflow: hidden;
+			min-height: 30px;
+			padding: 0 10px;
+
+			.prefix-label,
+			.suffix-label
+			{
+				display: none;
+			}
 
 			&:active, &:focus, &:hover
 			{
-				opacity: 1;
+				border-color: rgba( $primary-blue, 0.45 );
+			}
+		}
+
+	}
+
+	.popup-panel.autocomplete
+	{
+		width: calc( 100% - 8px );
+		max-width: calc( 100% - 8px );
+		min-width: calc( 100% - 8px );
+		max-height: 280px;
+		overflow-y: scroll;
+		gap: 4px;
+		border-radius: $rounding-default;
+		background-color: rgba( $default-900, 0.97 );
+		border: 1px solid rgba( $default-border, 0.9 );
+		padding: 6px;
+
+		> .button
+		{
+			justify-content: flex-start;
+			text-align: left;
+			padding: 8px 10px;
+			font-family: Roboto Mono;
+			font-size: 11px;
+			font-weight: 600;
+			color: $default-200;
+			white-space: nowrap;
+			border-radius: $rounding-small;
+			background-color: rgba( $default-700, 0.2 );
+			border: 1px solid transparent;
+
+			&:hover
+			{
+				color: $default-text;
+				background-color: rgba( $default-600, 0.3 );
+				border-color: rgba( $default-border, 0.8 );
+			}
+
+			&.active
+			{
+				color: $default-text;
+				background-color: rgba( $primary-blue, 0.3 );
+				border-color: rgba( $primary-blue, 0.6 );
+			}
+
+			&.typed-match
+			{
+				color: $default-text;
+				background-color: rgba( $primary-blue, 0.28 );
+				border-color: rgba( $primary-blue, 0.58 );
 			}
 		}
 	}

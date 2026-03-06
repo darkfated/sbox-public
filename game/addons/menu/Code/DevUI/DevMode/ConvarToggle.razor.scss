@@ -1,23 +1,28 @@
+@import '/styles/_Theme.scss';
+
 ConvarToggle
 {
-    padding: 1rem;
+    padding: 10px 14px;
     cursor: pointer;
-    font-family: Poppins;
+    font-family: $font-default;
     font-weight: bold;
     font-size: 14px;
-    border-radius: 10px;
-    background-color: #ffffff05;
-    color: #fffa;
+    border-radius: $rounding-default;
+    border: 1px solid transparent;
+    background-color: rgba( $default-500, 0.08 );
+    color: $default-text-light;
 }
 
 ConvarToggle:hover
 {
-    background-color: #fff1;
-    color: #fff
+    border-color: $default-border;
+    background-color: rgba( $default-500, 0.15 );
+    color: $default-text;
 }
 
 ConvarToggle.active
 {
-    background-color: #0088ff;
-    color: #fff;
+    border-color: rgba( $primary-blue, 0.6 );
+    background-color: rgba( $primary-blue, 0.3 );
+    color: $default-text;
 }

@@ -38,7 +38,7 @@ public class Console : Panel
 	{
 		Output = AddChild<VirtualList>();
 		Output.AddClass( "console_output" );
-		Output.ItemHeight = 19;
+		Output.ItemHeight = 18;
 		Output.PreferScrollToBottom = true;
 		Output.OnCreateCell = ( Panel cell, object data ) =>
 		{
@@ -55,6 +55,7 @@ public class Console : Panel
 			Input = toolbar.AddChild<TextEntry>();
 			Input.AddClass( "input" );
 			Input.AddEventListener( "onsubmit", OnSubmit );
+			Input.Placeholder = "Run command";
 			Input.AutoComplete = FillAutoComplete;
 			Input.HistoryCookie = "console-input-history";
 
@@ -72,8 +73,8 @@ public class Console : Panel
 			Message.Button = toolbar.AddChild( new Button( "0", null, "type msg", null ) );
 			Message.Button.AddEventListener( "onclick", () => { Message.Toggle(); OnFilter(); } );
 
-			toolbar.AddChild( new Button( "logs", "folder", () => OpenLogsFolder() ) );
-			var clear = toolbar.AddChild( new Button( "clear", "clear", () => OnClear() ) );
+			toolbar.AddChild( new Button( "logs", () => OpenLogsFolder() ) );
+			toolbar.AddChild( new Button( "clear", () => OnClear() ) );
 			ScrollConsole = toolbar.AddChild( new Button( null, "last_page", () => Output?.TryScrollToBottom() ) );
 		}
 
@@ -149,12 +150,6 @@ public class Console : Panel
 		return e.Message.Contains( Filter.Text, StringComparison.OrdinalIgnoreCase );
 	}
 
-	public override void Tick()
-	{
-		base.Tick();
-		ScrollConsole?.SetClass( "active", Output?.IsScrollAtBottom ?? false );
-	}
-
 	void OnClear()
 	{
 		Output.Clear();
@@ -183,7 +178,7 @@ public class Console : Panel
 		var t = Input.Text;
 		if ( string.IsNullOrWhiteSpace( t ) )
 		{
-			Input.Text = "";
+			ClearInput();
 			return;
 		}
 
@@ -209,10 +204,21 @@ public class Console : Panel
 
 		Output.TryScrollToBottom();
 
-		Input.Text = "";
 		Input.AddToHistory( t );
-		Input.DestroyAutoComplete();
+		ClearInput();
 		Input.Focus();
+	}
+
+	void ClearInput()
+	{
+		if ( !Input.IsValid() )
+			return;
+
+		Input.Text = string.Empty;
+		Input.CaretPosition = 0;
+		Input.DestroyAutoComplete();
+		Input.OnValueChanged();
+		Input.StateHasChanged();
 	}
 
 	private object[] FillAutoComplete( string arg )
@@ -220,7 +226,18 @@ public class Console : Panel
 		if ( string.IsNullOrWhiteSpace( arg ) )
 			return Array.Empty<string>();
 
-		return MenuUtility.AutoComplete( arg, 20 ).Select( x => (object)new TextEntry.AutocompleteEntry { Title = $"{x.Command} - {x.Description}".Trim( '-', ' ' ), Value = x.Command } ).ToArray();
+		var entries = MenuUtility.AutoComplete( arg, 20 ).ToList();
+		entries = entries
+			.OrderByDescending( x => string.Equals( x.Command, arg, StringComparison.OrdinalIgnoreCase ) )
+			.ThenByDescending( x => x.Command.StartsWith( arg, StringComparison.OrdinalIgnoreCase ) )
+			.ThenBy( x => x.Command )
+			.ToList();
+
+		return entries.Select( x => (object)new TextEntry.AutocompleteEntry
+		{
+			Title = x.Command,
+			Value = x.Command
+		} ).ToArray();
 	}
 
 	protected override void OnMouseDown( MousePanelEvent e )
@@ -231,6 +248,14 @@ public class Console : Panel
 		{
 			Unselect( child );
 		}
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+		ScrollConsole?.SetClass( "active", Output?.IsScrollAtBottom ?? false );
+		Input?.SetClass( "empty", string.IsNullOrEmpty( Input.Text ) );
+		Filter?.SetClass( "empty", string.IsNullOrEmpty( Filter.Text ) );
 	}
 
 	private void Unselect( Panel p )

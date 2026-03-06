@@ -51,8 +51,9 @@
 
     protected override void OnClick( MousePanelEvent e )
     {
-        var popup = new Popup( this, Popup.PositionMode.BelowLeft, 4f );
+        var popup = new Popup( this, Popup.PositionMode.BelowStretch, 4f );
         popup.CloseWhenParentIsHidden = true;
+        popup.AddClass( "render-mode-popup" );
 
         foreach ( var (mode, info) in DebugModes )
         {

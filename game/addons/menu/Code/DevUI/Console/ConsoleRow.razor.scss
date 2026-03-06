@@ -1,59 +1,108 @@
+@import '/styles/_Theme.scss';
+
 ConsoleRow
 {
     flex-shrink: 0;
     flex-grow: 0;
-    color: #a0a4a7;
     width: 100%;
     cursor: pointer;
     align-items: center;
     white-space: pre;
+    color: #919aab;
 
     .time
     {
-        color: red;
+        width: 88px;
+        min-width: 88px;
+        max-width: 88px;
+        justify-content: center;
         margin-right: 5px;
-        background-color: rgba(104, 125, 104, 0.2);
-        color: #687d68;
+        background-color: rgba( $default-700, 0.45 );
+        color: $default-200;
         padding: 1px 5px;
         flex-shrink: 0;
         flex-grow: 0;
         white-space: nowrap;
+        font-family: Roboto Mono;
+
+        > label
+        {
+            width: 100%;
+            text-align: center;
+            color: $default-200;
+        }
     }
 
     .message
     {
         white-space: nowrap;
+        color: #919aab;
     }
 
-    &.trace
+    &.Trace
     {
-        opacity: 0.6;
+        opacity: 0.8;
     }
 
-    &.warn
+    &.Warn
     {
-        color: #d47050;
+        color: #ffd75d;
     }
 
-    &.error
+    &.Error
     {
-        color: #BF616A;
-        background-color: rgba(#BF616A, 0.05);
+        color: #ff6f7c;
+        background-color: rgba( #ff5a6a, 0.1 );
     }
 
     &:hover
     {
-        background-color: #333;
+        background-color: rgba( $default-700, 0.45 );
     }
 
     &.in
     {
-        color: #68bf61;
+        color: $primary-blue;
     }
 
     &.highlight
     {
-        background-color: rgba(#fff, 0.02);
-        color: white;
+        background-color: rgba( $primary-blue, 0.1 );
+
+        color: $default-text;
+    }
+
+    .message > label,
+    .message *
+    {
+        color: #919aab;
+    }
+
+    &.Warn .message,
+    &.Warn .message > label,
+    &.Warn .message *
+    {
+        color: #ffd75d;
+    }
+
+    &.Error .message,
+    &.Error .message > label,
+    &.Error .message *
+    {
+        color: #ff6f7c;
+    }
+
+    &.in .message,
+    &.in .message > label,
+    &.in .message *
+    {
+        color: $primary-blue;
+    }
+
+    &.highlight .message,
+    &.highlight .message > label,
+    &.highlight .message *
+    {
+        color: $default-text;
     }
 }
