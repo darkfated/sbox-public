@@ -34,6 +34,7 @@
     public static DeveloperMode Current => Singleton;
 
     public Console Console { get; set; }
+    bool RenderModePickerOpen { get; set; }
 
     public static bool Open { get; protected set; }
 
@@ -47,6 +48,7 @@
         base.Tick();
 
         SetClass("open", Open);
+        SetClass( "render-mode-picker-open", RenderModePickerOpen );
     }
 
 
@@ -62,12 +64,19 @@
         else
         {
             Console.Input.Blur();
+            SetRenderModePickerOpen( false );
           //  Event.Run("developermode.close");
         }
 
         FindRootPanel().SetClass("developermode", Open);
 
         MenuUtility.SkipAllTransitions();
+    }
+
+    public void SetRenderModePickerOpen( bool open )
+    {
+        RenderModePickerOpen = open;
+        StateHasChanged();
     }
 
     public override Panel FindPopupPanel() => this;

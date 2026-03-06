@@ -2,7 +2,25 @@
 @inherits Panel
 
 <root>
-    <i>@CurrentIcon</i> @CurrentTitle
+    <div class="trigger" onclick="@ToggleMenu">
+        <i>@CurrentIcon</i>
+        <span>@CurrentTitle</span>
+    </div>
+
+    @if ( _menuOpen )
+    {
+        <div class="menu-overlay">
+            @foreach ( var (mode, info) in DebugModes )
+            {
+                var captured = mode;
+                var modeClass = mode == _selectedMode ? "mode-option active" : "mode-option";
+                <div class="@modeClass" onclick="@(() => SelectMode( captured ))">
+                    <i>@(info.Icon ?? "image")</i>
+                    <span>@(info.Name ?? captured.ToString())</span>
+                </div>
+            }
+        </div>
+    }
 </root>
 
 
@@ -12,6 +30,7 @@
         = DisplayInfo.ForEnumValues<SceneCameraDebugMode>();
 
     SceneCameraDebugMode _selectedMode;
+    bool _menuOpen;
 
     string CurrentTitle => GetDisplayInfo().Name ?? _selectedMode.ToString();
     string CurrentIcon => GetDisplayInfo().Icon ?? "image";
@@ -27,19 +46,53 @@
     void SetMode( SceneCameraDebugMode mode )
     {
         _selectedMode = mode;
-        ConsoleSystem.Run( "mat_toolsvis", ((int)mode).ToString() );
-
-        if ( Game.ActiveScene?.Camera is CameraComponent cam )
-            cam.DebugMode = mode;
+        ConsoleSystem.Run( "mat_toolsvis", mode.ToString() );
 
         StateHasChanged();
+    }
+
+    void ToggleMenu()
+    {
+        _menuOpen = !_menuOpen;
+        DeveloperMode.Current?.SetRenderModePickerOpen( _menuOpen );
+        StateHasChanged();
+    }
+
+    void SelectMode( SceneCameraDebugMode mode )
+    {
+        SetMode( mode );
+        _menuOpen = false;
+        DeveloperMode.Current?.SetRenderModePickerOpen( false );
+        StateHasChanged();
+    }
+
+    bool TryGetModeFromConvar( out SceneCameraDebugMode mode )
+    {
+        mode = default;
+
+        var raw = ConsoleSystem.GetValue( "mat_toolsvis" );
+        if ( string.IsNullOrWhiteSpace( raw ) )
+            return false;
+
+        raw = raw.Trim().Trim( '"' );
+
+        if ( Enum.TryParse<SceneCameraDebugMode>( raw, true, out var parsedMode ) && Enum.IsDefined( typeof( SceneCameraDebugMode ), parsedMode ) )
+        {
+            mode = parsedMode;
+            return true;
+        }
+
+        return false;
     }
 
     public override void Tick()
     {
         base.Tick();
 
-        var actual = Game.ActiveScene?.Camera?.DebugMode ?? SceneCameraDebugMode.Normal;
+        var actual = _selectedMode;
+        if ( TryGetModeFromConvar( out var convarMode ) )
+            actual = convarMode;
+
         if ( _selectedMode != actual )
         {
             _selectedMode = actual;
@@ -47,21 +100,6 @@
         }
 
         SetClass( "active", _selectedMode != SceneCameraDebugMode.Normal );
-    }
-
-    protected override void OnClick( MousePanelEvent e )
-    {
-        var popup = new Popup( this, Popup.PositionMode.BelowStretch, 4f );
-        popup.CloseWhenParentIsHidden = true;
-        popup.AddClass( "render-mode-popup" );
-
-        foreach ( var (mode, info) in DebugModes )
-        {
-            var captured = mode;
-            var option = popup.AddOption( info.Name, info.Icon, () => SetMode( captured ) );
-
-            if ( mode == _selectedMode )
-                option.AddClass( "active" );
-        }
+        SetClass( "open", _menuOpen );
     }
 }
