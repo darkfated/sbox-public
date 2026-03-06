@@ -5,7 +5,9 @@
     <div class="close" onclick="@Hide"><i>close</i></div>
     <div @ref="Output" class="message" AllowChildSelection="true" AcceptsFocus="true" @onkeypress="KeyPress">
         <div class="text">@message</div>
-        <div class="stack">@(entry?.Stack ?? string.Empty)</div>
+        <div class="stack">
+            <label class="details">@(entry?.Stack ?? string.Empty)</label>
+        </div>
     </div>
 </root>
 

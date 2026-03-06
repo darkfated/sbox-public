@@ -70,6 +70,14 @@ console .logeventpanel .message > *
     padding: 8px;
 }
 
+.message .stack > .details
+{
+    font-size: 12px;
+    line-height: 16px;
+    color: $default-text-light;
+    white-space: pre;
+}
+
 console .logeventpanel .close
 {
     position: absolute;
