@@ -1,4 +1,4 @@
-﻿using Sandbox.UI.Construct;
+using Sandbox.UI.Construct;
 
 namespace Sandbox.UI.Dev;
 
@@ -19,13 +19,23 @@ public class ExceptionNotification : Panel
 
 	public ExceptionNotification()
 	{
-		Add.Icon( "😥" );
+		AddClass( "exception-notification" );
+		Style.Position = PositionMode.Absolute;
+		Style.Top = 16;
+		Style.Right = 16;
+		Style.Left = null;
+		Style.Bottom = null;
+		Style.Dirty();
 
-		var column = new Panel( this, "column" );
-		column.AddChild( new Label() { Text = "Code Error" } );
+		var content = Add.Panel( "content" );
+		var header = content.Add.Panel( "header" );
 
-		message = column.Add.Label( "Something went wrong! This is an exception notice!", "message" );
-		traceContainer = column.AddChild<NoWheelPanel>();
+		var symbol = header.Add.Icon( "error" );
+		symbol.AddClass( "symbol" );
+		header.Add.Label( "Code Error", "title" );
+
+		message = content.Add.Label( "Something went wrong! This is an exception notice!", "message" );
+		traceContainer = content.AddChild<NoWheelPanel>();
 		traceContainer.AddClass( "trace-container" );
 		trace = traceContainer.Add.Label( "", "trace" );
 		trace.Multiline = true;
@@ -40,8 +50,6 @@ public class ExceptionNotification : Panel
 
 		SetClass( "hidden", TimeSinceLastError > 8 );
 		SetClass( "fresh", TimeSinceLastError < 0.2f );
-
-		PositionLikeAutocomplete();
 	}
 
 	internal void OnException( LogEvent entry )
@@ -73,24 +81,5 @@ public class ExceptionNotification : Panel
 	public override void OnMouseWheel( Vector2 value )
 	{
 		// Swallow wheel input so scrolling this panel doesn't scroll UI behind it.
-	}
-
-	void PositionLikeAutocomplete()
-	{
-		var input = DeveloperMode.Current?.Console?.Input;
-		if ( !input.IsValid() )
-			return;
-
-		var inputRect = input.Box.Rect * input.ScaleFromScreen;
-		var height = (Box.Rect.Height * ScaleFromScreen);
-		if ( height <= 0 )
-			height = 260f;
-
-		var top = inputRect.Top - 8f - height;
-		top = top.Clamp( 16f, Screen.Height - height - 16f );
-
-		Style.Top = top;
-		Style.Bottom = null;
-		Style.Dirty();
 	}
 }

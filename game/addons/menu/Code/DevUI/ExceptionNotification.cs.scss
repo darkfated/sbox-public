@@ -1,80 +1,111 @@
-
 @import '/styles/_Theme.scss';
 
-ExceptionNotification
+.exception-notification
 {
 	position: absolute;
-	top: 100px;
-	right: 24px;
-	background-color: rgba( $default-900, 0.95 );
-	border: 1px solid rgba( #ff5a6a, 0.6 );
+	top: 16px;
+	right: 16px;
+	width: 460px;
+	max-width: 45%;
+	min-width: 340px;
+	max-height: 340px;
+	padding: 10px;
+	background-color: rgba( $default-900, 0.96 );
+	border: 1px solid rgba( $default-border, 0.9 );
+	border-left: 2px solid rgba( #ff6f80, 0.9 );
 	color: $default-text;
-	font-size: 13px;
 	font-family: $font-default;
-	padding: 16px;
-	border-radius: $rounding-large;
-	box-shadow: 0 8px 35px rgba( black, 0.4 );
-	flex-direction: row;
-	align-items: flex-start;
+	font-size: 11px;
+	border-radius: $rounding-default;
+	box-shadow: 0 8px 30px rgba( black, 0.45 );
 	pointer-events: auto;
-	transition: all 0.1s ease;
-	gap: 16px;
-	width: 620px;
-	max-height: 260px;
-
-	iconpanel
-	{
-		color: #ff919e;
-		font-size: 36px;
-	}
+	z-index: 200;
+	transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+	transform: translateX( 0 );
+	overflow: hidden;
+	flex-direction: column;
 
 	&.fresh
 	{
-		background-color: rgba( #ff5a6a, 0.25 );
-		opacity: 1;
+		border-color: rgba( #ff6f80, 0.9 );
+		background-color: rgba( $default-800, 0.98 );
 	}
 
 	&.hidden
 	{
 		opacity: 0;
-		transition: all 0.5s linear;
+		transform: translateX( 12px );
+		pointer-events: none;
+		transition: opacity 0.35s linear, transform 0.35s ease;
 	}
-}
 
+	> .content
+	{
+		flex-direction: column;
+		gap: 6px;
+		min-width: 0;
+		width: 100%;
+	}
 
-.column
-{
-	flex-direction: column;
-	font-size: 12px;
-	gap: 8px;
-}
+	.header
+	{
+		flex-direction: row;
+		align-items: center;
+		gap: 8px;
+		min-height: 18px;
+		padding-bottom: 2px;
+		border-bottom: 1px solid rgba( $default-border, 0.45 );
+	}
 
-.column *:first-child
-{
-	font-size: 20px;
-	font-family: $font-heading;
-	font-weight: bold;
-	margin-bottom: 2px;
-}
+	.symbol
+	{
+		color: #ff97a3;
+		font-size: 16px;
+		opacity: 0.95;
+	}
 
-.trace-container
-{
-	flex-direction: column;
-	max-height: 150px;
-	overflow-y: scroll;
-	background-color: rgba( $default-950, 0.6 );
-	border-radius: $rounding-small;
-	padding: 8px;
-}
+	.title
+	{
+		font-family: $font-default;
+		font-size: 13px;
+		font-weight: 700;
+		color: $default-text-light;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+		line-height: 16px;
+	}
 
-.trace
-{
-	font-family: Roboto Mono;
-	font-size: 11px;
-	color: $default-100;
-}
+	.message
+	{
+		font-size: 12px;
+		line-height: 16px;
+		color: rgba( $default-text, 0.95 );
+		white-space: pre;
+	}
 
-ExceptionNotification:not(.has-trace) .trace-container
-{
-	display: none;
+	.trace-container
+	{
+		flex-direction: column;
+		max-height: 220px;
+		overflow-y: scroll;
+		background-color: rgba( $default-950, 0.62 );
+		border: 1px solid rgba( $default-border, 0.7 );
+		border-radius: $rounding-small;
+		padding: 7px 8px;
+	}
+
+	.trace
+	{
+		font-family: Roboto Mono;
+		font-size: 11px;
+		line-height: 15px;
+		color: $default-100;
+		white-space: pre;
+	}
+
+	&:not(.has-trace) .trace-container
+	{
+		display: none;
+	}
 }
