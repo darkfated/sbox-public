@@ -1,6 +1,7 @@
 
 @import '/styles/base.scss';
 @import '/styles/form.scss';
+@import '/styles/_Theme.scss';
 
 devlayer
 {
@@ -8,6 +9,7 @@ devlayer
 	z-index: 10000;
 	height: 100%;
 	pointer-events: none;
+	font-family: $font-default;
 
 	&.developermode
 	{
@@ -24,7 +26,11 @@ devlayer
 	.popup-panel
 	{
 		pointer-events: all;
-		font-family: Roboto;
+		font-family: $font-default;
+		background-color: $default-900;
+		border-radius: $rounding-default;
+		outline: 1px solid $default-border;
+		color: $default-text;
 
 		.button
 		{

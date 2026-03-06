@@ -1,19 +1,19 @@
 @namespace Sandbox.UI.Dev.Stats
 @inherits Panel
 
-<root class="statbox"> 
+<root class="statbox">
 
-	<title>Network Stats</title>
-	
+	<div class="stat-title">Network Stats</div>
+
 	@{
 		var hostConnection = Connection.Host;
 		var peerConnections = Connection.All.Where( c => c != Connection.Local && c != hostConnection ).ToArray();
-		
+
 		var totalBytesIn = 0f;
 		var totalBytesOut = 0f;
 		var totalPacketsIn = 0f;
 		var totalPacketsOut = 0f;
-		
+
 		if ( hostConnection is not null )
 		{
 			var stats = hostConnection.Stats;
@@ -38,8 +38,8 @@
 	}
 
 	<StatValue Value="@peerCount.ToString()" Title="Peers"></StatValue>
-	<StatValue Value="@((totalBytesIn / 1024f).ToString( "0.00" ))" Title="KB In Per Second"></StatValue>
-	<StatValue Value="@((totalBytesOut / 1024f).ToString( "0.00" ))" Title="KB Out Per Second"></StatValue>
+	<StatValue Value="@( (totalBytesIn / 1024f).ToString( "0.00" ) )" Title="KB In Per Second"></StatValue>
+	<StatValue Value="@( (totalBytesOut / 1024f).ToString( "0.00" ) )" Title="KB Out Per Second"></StatValue>
 	<StatValue Value="@totalPacketsIn.ToString( "0.00" )" Title="Packets In Per Second"></StatValue>
 	<StatValue Value="@totalPacketsOut.ToString( "0.00" )" Title="Packets Out Per Second"></StatValue>
 </root>

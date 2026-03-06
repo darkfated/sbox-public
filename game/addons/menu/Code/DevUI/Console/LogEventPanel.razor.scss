@@ -1,24 +1,36 @@
 
+@import '/styles/_Theme.scss';
+
 
 console .logeventpanel
 {
-    background-color: #202022;
-    color: #fff;
-    border-radius: 3px;
-    box-shadow: 5px 5px 40px #000a;
+    background-color: rgba( $default-900, 0.92 );
+    color: $default-text;
+    border-radius: $rounding-default;
+    box-shadow: 0 6px 30px rgba( black, 0.45 );
+    outline: 1px solid $default-border;
     padding: 0px;
     white-space: nowrap;
-    position: relative;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 50px;
+    z-index: 20;
     overflow: hidden;
-    height: 200px;
+    height: 210px;
     transition: all 0.2s ease-in-out;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
+    pointer-events: all;
 }
 
 console .logeventpanel.hidden
 {
     height: 0px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY( 6px );
+    display: none;
 }
 
 console .logeventpanel .message
@@ -47,7 +59,7 @@ console .logeventpanel .message > *
     overflow-y: scroll;
     flex-shrink: 0;
     flex-grow: 1;
-    height: 200px;
+    height: 176px;
     flex-direction: column;
 }
 
@@ -72,7 +84,7 @@ console .logeventpanel .close
 
     &:hover
     {
-        background-color: #fff2;
+        background-color: $primary-blue;
     }
 }
 

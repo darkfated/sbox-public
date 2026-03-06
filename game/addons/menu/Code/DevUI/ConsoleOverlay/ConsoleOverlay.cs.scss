@@ -1,3 +1,4 @@
+@import '/styles/_Theme.scss';
 
 consoleoverlay
 {
@@ -24,31 +25,69 @@ consoleoverlay
 		ConsoleEntry
 		{
 			flex-shrink: 0;
-			color: #fff;
 			cursor: pointer;
+			color: #919aab;
 
 			label
 			{
-				text-shadow: 2px 2px 0px #000;
+				text-shadow: 1px 1px 0px rgba( $default-950, 0.95 );
 				padding: 2px 10px;
-				font-size: 12px;
+				font-size: 10px;
 				font-weight: 600;
-				background-color: #000d;
+				background-color: rgba( $default-950, 0.85 );
+				outline: 1px solid rgba( $default-border, 0.65 );
 			}
 
-			&.trace
+			.time
 			{
-				color: #b6ff00;
+				width: 88px;
+				min-width: 88px;
+				max-width: 88px;
+				justify-content: center;
+
+				> label
+				{
+					width: 100%;
+					text-align: center;
+					color: $default-200;
+				}
 			}
 
-			&.warn
+			.message > label
 			{
-				color: #ffd800;
+				color: #919aab;
 			}
 
-			&.error
+			.message
 			{
-				color: #ff0000;
+				color: #919aab;
+			}
+
+			&.Trace
+			{
+				opacity: 0.8;
+			}
+
+			&.Warn
+			{
+				color: #ffd75d;
+
+				.message,
+				.message > label
+				{
+					color: #ffd75d;
+				}
+			}
+
+			&.Error
+			{
+				color: #ff6f7c;
+
+				.message,
+				.message > label
+				{
+					color: #ff6f7c;
+				}
 			}
 		}
 	}

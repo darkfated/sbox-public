@@ -30,30 +30,44 @@
 
 @code
 {
+    static DeveloperMode Singleton;
+    public static DeveloperMode Current => Singleton;
+
     public Console Console { get; set; }
 
     public static bool Open { get; protected set; }
 
-    bool wasOpen;
+    public DeveloperMode()
+    {
+        Singleton = this;
+    }
 
     public override void Tick()
     {
         base.Tick();
 
-        if ( Open != wasOpen )
+        SetClass("open", Open);
+    }
+
+
+    void Toggle()
+    {
+        Open = !Open;
+
+        if (Open)
         {
-            wasOpen = Open;
-
-            if ( Open )
-                Console?.Input?.Focus();
-            else
-                Console?.Input?.Blur();
-
-            FindRootPanel()?.SetClass( "developermode", Open );
-            MenuUtility.SkipAllTransitions();
+            Console.Input.Focus();
+           // Event.Run("developermode.open");
+        }
+        else
+        {
+            Console.Input.Blur();
+          //  Event.Run("developermode.close");
         }
 
-        SetClass("open", Open);
+        FindRootPanel().SetClass("developermode", Open);
+
+        MenuUtility.SkipAllTransitions();
     }
 
     public override Panel FindPopupPanel() => this;
@@ -61,6 +75,6 @@
     [MenuConCmd("con_toggle")]
     static void ToggleConsole()
     {
-        Open = !Open;
+        Singleton?.Toggle();
     }
 }

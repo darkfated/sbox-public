@@ -1,32 +1,36 @@
 
+@import '/styles/_Theme.scss';
+
 ExceptionNotification
 {
 	position: absolute;
 	top: 100px;
-	right: 100px;
-	background-color: #802;
-	border: 5px solid #fd5;
-	color: #fd5;
-	font-size: 15px;
-	font-family: "roboto";
+	right: 24px;
+	background-color: rgba( $default-900, 0.95 );
+	border: 1px solid rgba( #ff5a6a, 0.6 );
+	color: $default-text;
+	font-size: 13px;
+	font-family: $font-default;
 	padding: 16px;
-	border-radius: 12px;
-	box-shadow: 0 0 10px rgba( yellow, 0 );
+	border-radius: $rounding-large;
+	box-shadow: 0 8px 35px rgba( black, 0.4 );
 	flex-direction: row;
 	align-items: flex-start;
 	pointer-events: auto;
 	transition: all 0.1s ease;
 	gap: 16px;
+	width: 620px;
+	max-height: 260px;
 
 	iconpanel
 	{
-		color: yellow;
+		color: #ff919e;
 		font-size: 36px;
 	}
 
 	&.fresh
 	{
-		background-color: #ff0056;
+		background-color: rgba( #ff5a6a, 0.25 );
 		opacity: 1;
 	}
 
@@ -42,12 +46,35 @@ ExceptionNotification
 {
 	flex-direction: column;
 	font-size: 12px;
+	gap: 8px;
 }
 
 .column *:first-child
 {
 	font-size: 20px;
-	font-family: poppins;
+	font-family: $font-heading;
 	font-weight: bold;
-	margin-bottom: 8px;
+	margin-bottom: 2px;
+}
+
+.trace-container
+{
+	flex-direction: column;
+	max-height: 150px;
+	overflow-y: scroll;
+	background-color: rgba( $default-950, 0.6 );
+	border-radius: $rounding-small;
+	padding: 8px;
+}
+
+.trace
+{
+	font-family: Roboto Mono;
+	font-size: 11px;
+	color: $default-100;
+}
+
+ExceptionNotification:not(.has-trace) .trace-container
+{
+	display: none;
 }
