@@ -2,59 +2,108 @@
 
 RenderModeSelect
 {
-    padding: 10px 14px;
-    cursor: pointer;
+    position: relative;
+    width: 100%;
     font-family: $font-default;
     font-weight: bold;
     font-size: 14px;
-    border-radius: $rounding-default;
-    border: 1px solid transparent;
-    background-color: rgba( $default-500, 0.08 );
     color: $default-text-light;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
 
-    i
+    > .trigger
     {
-        font-size: 16px;
-        opacity: 0.7;
-    }
-}
+        width: 100%;
+        padding: 10px 14px;
+        cursor: pointer;
+        border-radius: $rounding-default;
+        border: 1px solid transparent;
+        background-color: rgba( $default-500, 0.08 );
+        color: $default-text-light;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        min-height: 40px;
 
-RenderModeSelect:hover
-{
-    border-color: $default-border;
-    background-color: rgba( $default-500, 0.15 );
-    color: $default-text;
-
-    i
-    {
-        opacity: 1;
-    }
-}
-
-RenderModeSelect.active
-{
-    border-color: rgba( $primary-blue, 0.6 );
-    background-color: rgba( $primary-blue, 0.3 );
-    color: $default-text;
-}
-
-.popup-panel.render-mode-popup
-{
-    > .button
-    {
-        padding: 8px 12px;
-        gap: 10px;
-        justify-content: flex-start;
-        text-align: left;
-
-        .iconpanel
+        i
         {
-            min-width: 18px;
-            margin-right: 4px;
+            font-size: 16px;
             opacity: 0.7;
+        }
+    }
+
+    &:hover > .trigger
+    {
+        border-color: $default-border;
+        background-color: rgba( $default-500, 0.15 );
+        color: $default-text;
+
+        i
+        {
+            opacity: 1;
+        }
+    }
+
+    &.active > .trigger
+    {
+        border-color: rgba( $primary-blue, 0.6 );
+        background-color: rgba( $primary-blue, 0.3 );
+        color: $default-text;
+    }
+
+    &.open > .trigger
+    {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    > .menu-overlay
+    {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+        padding: 0;
+        gap: 8px;
+        flex-direction: column;
+    }
+
+    .mode-option
+    {
+        width: 100%;
+        padding: 10px 14px;
+        cursor: pointer;
+        border-radius: $rounding-default;
+        border: 1px solid transparent;
+        background-color: rgba( $default-500, 0.08 );
+        color: $default-text-light;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        min-height: 40px;
+
+        i
+        {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        &:hover
+        {
+            border-color: $default-border;
+            background-color: rgba( $default-500, 0.15 );
+            color: $default-text;
+
+            i
+            {
+                opacity: 1;
+            }
+        }
+
+        &.active
+        {
+            border-color: rgba( $primary-blue, 0.6 );
+            background-color: rgba( $primary-blue, 0.3 );
+            color: $default-text;
         }
     }
 }

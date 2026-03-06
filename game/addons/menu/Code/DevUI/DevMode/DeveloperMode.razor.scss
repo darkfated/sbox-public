@@ -34,6 +34,11 @@ DeveloperMode > .left
     gap: 8px;
 }
 
+DeveloperMode.render-mode-picker-open > .left > :not(RenderModeSelect)
+{
+    display: none;
+}
+
 DeveloperMode > .center
 {
     flex-grow: 1;
