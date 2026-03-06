@@ -89,6 +89,13 @@
     {
         base.Tick();
 
+        if ( _menuOpen && !DeveloperMode.Open )
+        {
+            _menuOpen = false;
+            DeveloperMode.Current?.SetRenderModePickerOpen( false );
+            StateHasChanged();
+        }
+
         var actual = _selectedMode;
         if ( TryGetModeFromConvar( out var convarMode ) )
             actual = convarMode;
