@@ -53,6 +53,7 @@
 
     void ToggleMenu()
     {
+        Sound.Play( "ui.button.press" );
         _menuOpen = !_menuOpen;
         DeveloperMode.Current?.SetRenderModePickerOpen( _menuOpen );
         StateHasChanged();
@@ -60,6 +61,7 @@
 
     void SelectMode( SceneCameraDebugMode mode )
     {
+        Sound.Play( "ui.button.press" );
         SetMode( mode );
         _menuOpen = false;
         DeveloperMode.Current?.SetRenderModePickerOpen( false );

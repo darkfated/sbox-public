@@ -152,6 +152,7 @@ public class Console : Panel
 
 	void OnClear()
 	{
+		Sound.Play( "ui.button.press" );
 		Output.Clear();
 		Entries.Clear();
 
@@ -162,6 +163,7 @@ public class Console : Panel
 
 	void OpenLogsFolder()
 	{
+		Sound.Play( "ui.button.press" );
 		MenuUtility.OpenFolder( Environment.CurrentDirectory + "/logs/" );
 	}
 
