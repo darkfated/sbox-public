@@ -11,15 +11,13 @@
 	max-height: 340px;
 	padding: 10px;
 	background-color: rgba( $default-900, 0.96 );
-	border: 1px solid rgba( $default-border, 0.9 );
-	border-left: 2px solid rgba( #ff6f80, 0.9 );
+	border: 1px solid rgba( #ff6f80, 0.9 );
 	color: $default-text;
 	font-family: $font-default;
 	font-size: 11px;
 	border-radius: $rounding-default;
-	box-shadow: 0 8px 30px rgba( black, 0.45 );
 	pointer-events: auto;
-	z-index: 200;
+	z-index: 100000;
 	transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
 	transform: translateX( 0 );
 	overflow: hidden;
@@ -27,7 +25,6 @@
 
 	&.fresh
 	{
-		border-color: rgba( #ff6f80, 0.9 );
 		background-color: rgba( $default-800, 0.98 );
 	}
 
