@@ -45,7 +45,7 @@ console
 		{
 			font-family: $font-default;
 			background-color: rgba( $default-500, 0.08 );
-			color: $default-100;
+			color: $default-200;
 			border: 1px solid transparent;
 			border-radius: $rounding-small;
 			padding: 0px 14px;
@@ -59,6 +59,15 @@ console
 			cursor: pointer;
 			gap: 5px;
 
+			Label,
+			.label,
+			iconpanel,
+			.iconpanel,
+			span
+			{
+				color: $default-200;
+			}
+
 			&.active
 			{
 				background-color: rgba( $primary-blue, 0.25 );
@@ -69,6 +78,8 @@ console
 
 		Button.scroll-down-btn
 		{
+			background-color: rgba( $primary-blue, 0.25 );
+			border-color: rgba( $primary-blue, 0.45 );
 			min-width: 46px;
 			padding: 0 10px;
 			font-size: 16px;
