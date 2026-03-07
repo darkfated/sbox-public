@@ -27,33 +27,9 @@ console
 		font-size: 10px;
 		font-weight: 500;
 		color: #919aab;
-	}
-
-	.input
-	{
-		background-color: rgba( $default-800, 0.85 );
-		border: 1px solid transparent;
+		background-color: rgba( $default-900, 0.32 );
+		backdrop-filter: blur( 6px );
 		border-radius: $rounding-small;
-		cursor: text;
-		flex-shrink: 0;
-		color: $default-text;
-		overflow: hidden;
-		flex-grow: 1;
-		flex-basis: 0;
-		min-width: 180px;
-		min-height: 30px;
-		padding: 0 10px;
-
-		.prefix-label,
-		.suffix-label
-		{
-			display: none;
-		}
-
-		&:active, &:focus, &:hover
-		{
-			border-color: rgba( $primary-blue, 0.45 );
-		}
 	}
 
 	.toolbar
@@ -170,53 +146,4 @@ console
 
 	}
 
-	.popup-panel.autocomplete
-	{
-		width: calc( 100% - 8px );
-		max-width: calc( 100% - 8px );
-		min-width: calc( 100% - 8px );
-		max-height: 280px;
-		overflow-y: scroll;
-		gap: 4px;
-		border-radius: $rounding-default;
-		background-color: rgba( $default-900, 0.97 );
-		border: 1px solid rgba( $default-border, 0.9 );
-		padding: 6px;
-
-		> .button
-		{
-			justify-content: flex-start;
-			text-align: left;
-			padding: 8px 10px;
-			font-family: Roboto Mono;
-			font-size: 11px;
-			font-weight: 600;
-			color: $default-200;
-			white-space: nowrap;
-			border-radius: $rounding-small;
-			background-color: rgba( $default-700, 0.2 );
-			border: 1px solid transparent;
-
-			&:hover
-			{
-				color: $default-text;
-				background-color: rgba( $default-600, 0.3 );
-				border-color: rgba( $default-border, 0.8 );
-			}
-
-			&.active
-			{
-				color: $default-text;
-				background-color: rgba( $primary-blue, 0.3 );
-				border-color: rgba( $primary-blue, 0.6 );
-			}
-
-			&.typed-match
-			{
-				color: $default-text;
-				background-color: rgba( $primary-blue, 0.28 );
-				border-color: rgba( $primary-blue, 0.58 );
-			}
-		}
-	}
 }
