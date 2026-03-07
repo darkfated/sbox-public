@@ -1,6 +1,3 @@
-using System.Globalization;
-using System.Reflection;
-
 namespace Sandbox.UI.Dev;
 
 public class ConsoleTextEntry : TextEntry
@@ -49,7 +46,7 @@ public class ConsoleTextEntry : TextEntry
 		if ( button == "tab" )
 		{
 			var parsed = ParseInput( Text );
-			if ( parsed.HasArgumentSlot && ResolveCommandInfo( parsed.Command ).Exists )
+			if ( parsed.HasArgumentSlot && BuildCommandPanelModel( parsed ).IsValid )
 			{
 				e.StopPropagation = true;
 				return;
@@ -129,7 +126,7 @@ public class ConsoleTextEntry : TextEntry
 	public object[] FillAutoComplete( string arg )
 	{
 		if ( string.IsNullOrWhiteSpace( arg ) )
-			return Array.Empty<string>();
+			return Array.Empty<object>();
 
 		var trimmed = arg.TrimStart();
 		var firstSeparator = trimmed.IndexOf( ' ' );
@@ -188,6 +185,7 @@ public class ConsoleTextEntry : TextEntry
 
 		suggestionPanel.DeleteChildren( true );
 		suggestionItems.Clear();
+		var commandValueCache = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
 
 		foreach ( var option in options )
 		{
@@ -196,7 +194,20 @@ public class ConsoleTextEntry : TextEntry
 				continue;
 
 			item.Command = ExtractFirstToken( item.Value );
-			item.CurrentValue = string.IsNullOrWhiteSpace( item.Command ) ? null : ConsoleSystem.GetValue( item.Command );
+			if ( string.IsNullOrWhiteSpace( item.Command ) )
+			{
+				item.CurrentValue = null;
+			}
+			else if ( !commandValueCache.TryGetValue( item.Command, out var currentValue ) )
+			{
+				currentValue = ConsoleSystem.GetValue( item.Command );
+				commandValueCache[item.Command] = currentValue;
+				item.CurrentValue = currentValue;
+			}
+			else
+			{
+				item.CurrentValue = currentValue;
+			}
 			suggestionItems.Add( item );
 
 			var suggestionValue = item.Value;
@@ -385,7 +396,7 @@ public class ConsoleTextEntry : TextEntry
 		if ( children.Length < 2 )
 			return;
 
-		var hasExplicitTypedBool = model.HasTypedValue && model.HasTypedBool;
+		var hasExplicitTypedBool = model.HasTypedBool;
 		var effectiveBool = hasExplicitTypedBool ? model.TypedBool : model.CurrentBool;
 
 		var offButton = children[0];
@@ -396,8 +407,8 @@ public class ConsoleTextEntry : TextEntry
 
 	void BuildBooleanControls( SmartArgumentModel model )
 	{
-		var offButton = AddSmartArgButton( "OFF", () => SetInputArgumentValue( model.Command, model.FalseToken ) );
-		var onButton = AddSmartArgButton( "ON", () => SetInputArgumentValue( model.Command, model.TrueToken ) );
+		AddSmartArgButton( "OFF", () => SetInputArgumentValue( model.Command, model.FalseToken ) );
+		AddSmartArgButton( "ON", () => SetInputArgumentValue( model.Command, model.TrueToken ) );
 		UpdateBooleanControlState( model );
 	}
 
@@ -408,16 +419,16 @@ public class ConsoleTextEntry : TextEntry
 		var smallStep = decimals > 0 ? 0.1 : 1.0;
 		var largeStep = smallStep * 10.0;
 
-		AddSmartArgButton( $"-{FormatStep( largeStep )}", () => ShiftNumericArgument( model, -largeStep ) );
-		AddSmartArgButton( $"-{FormatStep( smallStep )}", () => ShiftNumericArgument( model, -smallStep ) );
+		AddSmartArgButton( $"-{FormatStep( largeStep )}", () => ShiftNumericArgument( effectiveModel, -largeStep ) );
+		AddSmartArgButton( $"-{FormatStep( smallStep )}", () => ShiftNumericArgument( effectiveModel, -smallStep ) );
 		var currentButton = AddSmartArgButton( "current", () =>
 		{
-			var currentValue = ConsoleSystem.GetValue( model.Command, model.CurrentValue ) ?? model.CurrentValue;
-			SetInputArgumentValue( model.Command, currentValue );
+			var currentValue = ConsoleSystem.GetValue( effectiveModel.Command, effectiveModel.CurrentValue ) ?? effectiveModel.CurrentValue;
+			SetInputArgumentValue( effectiveModel.Command, currentValue );
 		} );
 		currentButton?.AddClass( "secondary" );
-		AddSmartArgButton( $"+{FormatStep( smallStep )}", () => ShiftNumericArgument( model, smallStep ) );
-		AddSmartArgButton( $"+{FormatStep( largeStep )}", () => ShiftNumericArgument( model, largeStep ) );
+		AddSmartArgButton( $"+{FormatStep( smallStep )}", () => ShiftNumericArgument( effectiveModel, smallStep ) );
+		AddSmartArgButton( $"+{FormatStep( largeStep )}", () => ShiftNumericArgument( effectiveModel, largeStep ) );
 	}
 
 	void ShiftNumericArgument( SmartArgumentModel model, double delta )
@@ -425,11 +436,6 @@ public class ConsoleTextEntry : TextEntry
 		var effectiveModel = ResolveLatestNumericModel( model );
 		var baseValue = effectiveModel.HasTypedNumber ? effectiveModel.TypedNumber : effectiveModel.CurrentNumber;
 		var result = baseValue + delta;
-
-		if ( effectiveModel.MinValue.HasValue )
-			result = Math.Max( result, effectiveModel.MinValue.Value );
-		if ( effectiveModel.MaxValue.HasValue )
-			result = Math.Min( result, effectiveModel.MaxValue.Value );
 
 		var formatted = FormatNumber( result, effectiveModel.DecimalPlaces );
 		SetInputArgumentValue( effectiveModel.Command, formatted );
@@ -484,42 +490,33 @@ public class ConsoleTextEntry : TextEntry
 	static string FormatStep( double step )
 	{
 		if ( Math.Abs( step % 1d ) < 0.000001d )
-			return ((int)Math.Round( step )).ToString( CultureInfo.InvariantCulture );
+			return ((int)Math.Round( step )).ToString( System.Globalization.CultureInfo.InvariantCulture );
 
-		return step.ToString( "0.##", CultureInfo.InvariantCulture );
+		return step.ToString( "0.##", System.Globalization.CultureInfo.InvariantCulture );
 	}
 
 	static string FormatNumber( double value, int decimals )
 	{
 		if ( decimals <= 0 )
-			return Math.Round( value ).ToString( CultureInfo.InvariantCulture );
+			return Math.Round( value ).ToString( System.Globalization.CultureInfo.InvariantCulture );
 
 		var clampedDecimals = Math.Clamp( decimals, 1, 4 );
 		var format = $"0.{new string( '#', clampedDecimals )}";
-		return value.ToString( format, CultureInfo.InvariantCulture );
+		return value.ToString( format, System.Globalization.CultureInfo.InvariantCulture );
 	}
 
 	SmartArgumentModel BuildCommandPanelModel( ParsedInput parsed )
 	{
-		var commandInfo = ResolveCommandInfo( parsed.Command );
-		if ( !commandInfo.Exists )
+		var currentValue = ConsoleSystem.GetValue( parsed.Command, null );
+		if ( string.IsNullOrWhiteSpace( currentValue ) )
 			return default;
-
-		var currentValue = commandInfo.IsVariable ? commandInfo.CurrentValue : null;
 
 		var model = new SmartArgumentModel
 		{
 			IsValid = true,
 			Command = parsed.Command,
-			CurrentValue = string.IsNullOrWhiteSpace( currentValue ) ? "-" : currentValue,
-			TypedValue = parsed.ArgumentText,
-			HasTypedValue = parsed.HasArgument,
-			MinValue = commandInfo.MinValue,
-			MaxValue = commandInfo.MaxValue
+			CurrentValue = currentValue,
 		};
-
-		if ( !commandInfo.IsVariable || string.IsNullOrWhiteSpace( currentValue ) )
-			return model;
 
 		if ( TryParseBoolToken( currentValue, out var currentBool ) )
 		{
@@ -558,8 +555,11 @@ public class ConsoleTextEntry : TextEntry
 
 	static bool TryParseNumberToken( string value, out double number )
 	{
-		return double.TryParse( value, NumberStyles.Float, CultureInfo.InvariantCulture, out number )
-			|| double.TryParse( value, NumberStyles.Float, CultureInfo.CurrentCulture, out number );
+		return double.TryParse(
+			value,
+			System.Globalization.NumberStyles.Float,
+			System.Globalization.CultureInfo.InvariantCulture,
+			out number );
 	}
 
 	static bool TryParseBoolToken( string value, out bool result )
@@ -649,50 +649,6 @@ public class ConsoleTextEntry : TextEntry
 		};
 	}
 
-	static readonly Type ConVarSystemType = typeof( ConsoleSystem ).Assembly.GetType( "Sandbox.ConVarSystem" );
-	static readonly MethodInfo ConVarFindMethod = ConVarSystemType?.GetMethod( "Find", BindingFlags.Static | BindingFlags.NonPublic );
-
-	static CommandInfo ResolveCommandInfo( string command )
-	{
-		if ( string.IsNullOrWhiteSpace( command ) || ConVarFindMethod is null )
-			return default;
-
-		try
-		{
-			var instance = ConVarFindMethod.Invoke( null, new object[] { command } );
-			if ( instance is null )
-				return default;
-
-			return new CommandInfo
-			{
-				Exists = true,
-				IsVariable = ReadBoolProperty( instance, "IsVariable" ),
-				CurrentValue = ConsoleSystem.GetValue( command, null ),
-				MinValue = ReadNullableFloatProperty( instance, "MinValue" ),
-				MaxValue = ReadNullableFloatProperty( instance, "MaxValue" )
-			};
-		}
-		catch
-		{
-			return default;
-		}
-	}
-
-	static bool ReadBoolProperty( object instance, string property )
-	{
-		var value = instance.GetType().GetProperty( property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )?.GetValue( instance );
-		return value is bool b && b;
-	}
-
-	static float? ReadNullableFloatProperty( object instance, string property )
-	{
-		var value = instance.GetType().GetProperty( property, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )?.GetValue( instance );
-		if ( value is float f )
-			return f;
-
-		return value as float?;
-	}
-
 	struct ParsedInput
 	{
 		public string Command;
@@ -701,22 +657,11 @@ public class ConsoleTextEntry : TextEntry
 		public bool HasArgumentSlot;
 	}
 
-	struct CommandInfo
-	{
-		public bool Exists;
-		public bool IsVariable;
-		public string CurrentValue;
-		public float? MinValue;
-		public float? MaxValue;
-	}
-
 	struct SmartArgumentModel
 	{
 		public bool IsValid;
 		public string Command;
 		public string CurrentValue;
-		public string TypedValue;
-		public bool HasTypedValue;
 
 		public bool IsBoolean;
 		public bool CurrentBool;
@@ -730,8 +675,6 @@ public class ConsoleTextEntry : TextEntry
 		public bool HasTypedNumber;
 		public double TypedNumber;
 		public int DecimalPlaces;
-		public float? MinValue;
-		public float? MaxValue;
 	}
 
 	enum SmartArgControlMode
