@@ -245,11 +245,7 @@ public class Console : Panel
 	protected override void OnMouseDown( MousePanelEvent e )
 	{
 		base.OnMouseDown( e );
-
-		foreach ( var child in Children )
-		{
-			Unselect( child );
-		}
+		UnselectAllInChildren();
 	}
 
 	public override void Tick()
@@ -258,20 +254,6 @@ public class Console : Panel
 		ScrollConsole?.SetClass( "active", Output?.IsScrollAtBottom ?? false );
 		Input?.SetClass( "empty", string.IsNullOrEmpty( Input.Text ) );
 		Filter?.SetClass( "empty", string.IsNullOrEmpty( Filter.Text ) );
-	}
-
-	private void Unselect( Panel p )
-	{
-		if ( p is Label l )
-		{
-			l.ShouldDrawSelection = false;
-			return;
-		}
-
-		foreach ( var child in p.Children )
-		{
-			Unselect( child );
-		}
 	}
 
 }
