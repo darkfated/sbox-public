@@ -5,7 +5,7 @@ public class Console : Panel
 {
 	internal List<LogEvent> Entries = new();
 	internal VirtualList Output;
-	internal TextEntry Input;
+	internal ConsoleTextEntry Input;
 	internal TextEntry Filter;
 	internal Button ScrollConsole;
 
@@ -52,11 +52,10 @@ public class Console : Panel
 
 		var toolbar = Add.Panel( "toolbar" );
 		{
-			Input = toolbar.AddChild<TextEntry>();
-			Input.AddClass( "input" );
+			Input = toolbar.AddChild<ConsoleTextEntry>();
 			Input.AddEventListener( "onsubmit", OnSubmit );
 			Input.Placeholder = "Run command";
-			Input.AutoComplete = FillAutoComplete;
+			Input.SuggestionProvider = Input.FillAutoComplete;
 			Input.HistoryCookie = "console-input-history";
 
 			Filter = toolbar.AddChild<TextEntry>();
@@ -208,7 +207,7 @@ public class Console : Panel
 
 		Input.AddToHistory( t );
 		ClearInput();
-		Input.Focus();
+		Input.FocusInput();
 	}
 
 	void ClearInput()
@@ -216,30 +215,7 @@ public class Console : Panel
 		if ( !Input.IsValid() )
 			return;
 
-		Input.Text = string.Empty;
-		Input.CaretPosition = 0;
-		Input.DestroyAutoComplete();
-		Input.OnValueChanged();
-		Input.StateHasChanged();
-	}
-
-	private object[] FillAutoComplete( string arg )
-	{
-		if ( string.IsNullOrWhiteSpace( arg ) )
-			return Array.Empty<string>();
-
-		var entries = MenuUtility.AutoComplete( arg, 20 ).ToList();
-		entries = entries
-			.OrderByDescending( x => string.Equals( x.Command, arg, StringComparison.OrdinalIgnoreCase ) )
-			.ThenByDescending( x => x.Command.StartsWith( arg, StringComparison.OrdinalIgnoreCase ) )
-			.ThenBy( x => x.Command )
-			.ToList();
-
-		return entries.Select( x => (object)new TextEntry.AutocompleteEntry
-		{
-			Title = x.Command,
-			Value = x.Command
-		} ).ToArray();
+		Input.ClearInput();
 	}
 
 	protected override void OnMouseDown( MousePanelEvent e )

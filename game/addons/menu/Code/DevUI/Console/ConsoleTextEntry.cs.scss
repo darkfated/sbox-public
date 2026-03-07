@@ -1,0 +1,138 @@
+@import '/styles/_Theme.scss';
+
+.console-textentry
+{
+	position: relative;
+	z-index: 100;
+	background-color: rgba( $default-800, 0.85 );
+	border: 1px solid transparent;
+	border-radius: $rounding-small;
+	cursor: text;
+	flex-shrink: 0;
+	color: $default-text;
+	overflow: visible;
+	flex-grow: 1;
+	flex-basis: 0;
+	min-width: 180px;
+	min-height: 30px;
+	height: 30px;
+	max-height: 30px;
+	padding: 0 10px;
+	align-items: center;
+	justify-content: flex-start;
+
+	.prefix-label,
+	.suffix-label
+	{
+		display: none;
+	}
+
+	.content-label
+	{
+		position: relative;
+		flex-grow: 1;
+		flex-shrink: 1;
+		min-width: 0;
+		color: $default-text;
+	}
+
+	&:active, &:focus, &:hover
+	{
+		border-color: rgba( $primary-blue, 0.45 );
+	}
+}
+
+.console-suggestion-menu
+{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: calc( -240px - 12px );
+	height: 240px;
+	max-height: 240px;
+	min-height: 240px;
+	flex-direction: column;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	gap: 4px;
+	border-radius: $rounding-default;
+	background-color: rgba( $default-900, 0.98 );
+	backdrop-filter: blur( 8px );
+	border: 1px solid rgba( $default-border, 0.85 );
+	padding: 6px;
+	z-index: 10000;
+
+	> .suggestion-item
+	{
+		height: 34px;
+		min-height: 34px;
+		max-height: 34px;
+		cursor: pointer;
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
+		justify-content: flex-start;
+		padding: 6px 8px;
+		font-family: Roboto Mono;
+		font-weight: 700;
+		border-radius: $rounding-small;
+		background-color: rgba( $default-700, 0.2 );
+		border: 1px solid transparent;
+		transition: background-color 0.06s ease-out;
+		color: #ffffff;
+		overflow: hidden;
+
+		> label
+		{
+			font-size: 12px;
+			line-height: 16px;
+			padding: 0;
+		}
+
+		> .name
+		{
+			flex-grow: 1;
+			flex-shrink: 1;
+			min-width: 0;
+			white-space: nowrap;
+			color: #ffffff;
+		}
+
+		> .value
+		{
+			flex-grow: 0;
+			flex-shrink: 0;
+			white-space: nowrap;
+			color: rgba( $default-200, 0.8 );
+			text-align: right;
+		}
+
+		&:hover
+		{
+			background-color: rgba( $default-600, 0.24 );
+		}
+
+		&.active
+		{
+			color: #ffffff;
+			background-color: rgba( $default-500, 0.2 );
+			border-color: rgba( $default-border, 0.9 );
+		}
+
+		&.typed-match
+		{
+			background-color: rgba( $primary-blue, 0.22 );
+			border-color: rgba( $primary-blue, 0.62 );
+
+			> .name
+			{
+				color: #ffffff;
+			}
+
+			> .value
+			{
+				color: rgba( $default-200, 0.86 );
+			}
+		}
+	}
+}
