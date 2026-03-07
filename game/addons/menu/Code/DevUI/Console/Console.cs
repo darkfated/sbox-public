@@ -77,11 +77,12 @@ public class Console : Panel
 
 			toolbar.AddChild( new Button( "logs", () => OpenLogsFolder() ) );
 			toolbar.AddChild( new Button( "clear", () => OnClear() ) );
-			ScrollConsole = toolbar.AddChild( new Button( null, "last_page", () =>
+			ScrollConsole = toolbar.AddChild( new Button( null, "arrow_downward", () =>
 			{
 				Output?.TryScrollToBottom();
 				UpdateToolbarState();
 			} ) );
+			ScrollConsole.AddClass( "scroll-down-btn" );
 		}
 
 		MenuUtility.AddLogger( OnConsoleMessage );

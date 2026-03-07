@@ -67,6 +67,13 @@ console
 			}
 		}
 
+		Button.scroll-down-btn
+		{
+			min-width: 46px;
+			padding: 0 10px;
+			font-size: 16px;
+		}
+
 		.type
 		{
 			background-color: rgba( $default-700, 0.25 );
