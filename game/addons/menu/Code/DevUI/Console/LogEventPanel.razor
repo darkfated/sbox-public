@@ -35,6 +35,11 @@
         StateHasChanged();
     }
 
+    public void Clear()
+    {
+        Hide();
+    }
+
     public override void OnButtonEvent(ButtonEvent e)
     {
         if ( e.HasCtrl && e.Button == "a" && e.Pressed )
