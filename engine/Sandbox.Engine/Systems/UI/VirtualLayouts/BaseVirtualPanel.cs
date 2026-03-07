@@ -44,6 +44,12 @@ public abstract class BaseVirtualPanel : Panel
 	public Action OnLastCell { get; set; }
 
 	/// <summary>
+	/// Additional items rendered above and below the visible range to reduce pop-in during scrolling.
+	/// </summary>
+	[Parameter]
+	public int OverscanCount { get; set; } = 0;
+
+	/// <summary>
 	/// Initializes the base virtual panel with default styles.
 	/// </summary>
 	protected BaseVirtualPanel()
@@ -221,6 +227,13 @@ public abstract class BaseVirtualPanel : Panel
 
 			// Get visible index range [first, pastEnd)
 			GetVisibleRange( out var first, out var pastEnd );
+
+			// Expand the render window to pre-create nearby cells and avoid abrupt pop-in while scrolling.
+			if ( OverscanCount > 0 )
+			{
+				first = Math.Max( 0, first - OverscanCount );
+				pastEnd = Math.Min( _items.Count, pastEnd + OverscanCount );
+			}
 
 			// Remove anything outside the visible window or without data.
 			DeleteNotVisible( first, pastEnd - 1 );
