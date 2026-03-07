@@ -12,6 +12,9 @@ ConsoleRow
     align-items: center;
     white-space: pre;
     color: #919aab;
+    opacity: 0;
+    transform: translateY( 3px );
+    animation: console-row-in 0.12s ease-out forwards;
 
     .time
     {
@@ -107,5 +110,20 @@ ConsoleRow
     &.highlight .message *
     {
         color: $default-text;
+    }
+}
+
+@keyframes console-row-in
+{
+    from
+    {
+        opacity: 0;
+        transform: translateY( 3px );
+    }
+
+    to
+    {
+        opacity: 1;
+        transform: translateY( 0px );
     }
 }
