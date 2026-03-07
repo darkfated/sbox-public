@@ -41,26 +41,6 @@ console
 		padding: 4px;
 		width: 100%;
 
-		.scroll
-		{
-			background-color: rgba( $default-500, 0.08 );
-			padding: 0px 12px;
-			flex-shrink: 1;
-			justify-content: center;
-			align-items: center;
-			font-weight: lighter;
-			font-size: 15px;
-			white-space: nowrap;
-			color: $default-200;
-			min-height: 30px;
-			border-radius: $rounding-small;
-
-			&.active
-			{
-				color: $default-text;
-			}
-		}
-
 		Button
 		{
 			font-family: $font-default;
