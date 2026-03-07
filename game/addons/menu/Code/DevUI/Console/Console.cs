@@ -8,6 +8,7 @@ public class Console : Panel
 	internal ConsoleTextEntry Input;
 	internal TextEntry Filter;
 	internal Button ScrollConsole;
+	readonly List<object> filteredEntries = new();
 
 	LogEventPanel logEventPanel;
 
@@ -55,6 +56,7 @@ public class Console : Panel
 		{
 			Input = toolbar.AddChild<ConsoleTextEntry>();
 			Input.AddEventListener( "onsubmit", OnSubmit );
+			Input.AddEventListener( "onchange", UpdateToolbarState );
 			Input.Placeholder = "Run command";
 			Input.SuggestionProvider = Input.FillAutoComplete;
 			Input.HistoryCookie = "console-input-history";
@@ -75,13 +77,18 @@ public class Console : Panel
 
 			toolbar.AddChild( new Button( "logs", () => OpenLogsFolder() ) );
 			toolbar.AddChild( new Button( "clear", () => OnClear() ) );
-			ScrollConsole = toolbar.AddChild( new Button( null, "last_page", () => Output?.TryScrollToBottom() ) );
+			ScrollConsole = toolbar.AddChild( new Button( null, "last_page", () =>
+			{
+				Output?.TryScrollToBottom();
+				UpdateToolbarState();
+			} ) );
 		}
 
 		MenuUtility.AddLogger( OnConsoleMessage );
 
 		Output.AcceptsFocus = true;
 		Output.AllowChildSelection = true;
+		UpdateToolbarState();
 
 	}
 
@@ -107,34 +114,27 @@ public class Console : Panel
 	void AddEvent( LogEvent e )
 	{
 		Entries.Add( e );
+		IncrementCategory( e.Level );
 
 		if ( ShouldShowEvent( e ) )
 		{
 			Output.AddItem( e );
 		}
-
-		if ( e.Level == LogLevel.Info || e.Level == LogLevel.Trace )
-		{
-			Message.Count++;
-			Message.Button.Text = $"{Message.Count:n0}";
-		}
-
-		if ( e.Level == LogLevel.Warn )
-		{
-			Warning.Count++;
-			Warning.Button.Text = $"{Warning.Count:n0}";
-		}
-
-		if ( e.Level == LogLevel.Error )
-		{
-			Error.Count++;
-			Error.Button.Text = $"{Error.Count:n0}";
-		}
+		UpdateToolbarState();
 	}
 
 	void OnFilter()
 	{
-		Output.SetItems( Entries.Where( x => ShouldShowEvent( x ) ).Select( x => x as object ) );
+		filteredEntries.Clear();
+
+		foreach ( var entry in Entries )
+		{
+			if ( ShouldShowEvent( entry ) )
+				filteredEntries.Add( entry );
+		}
+
+		Output.SetItems( filteredEntries );
+		UpdateToolbarState();
 	}
 
 	bool ShouldShowEvent( LogEvent e )
@@ -160,6 +160,7 @@ public class Console : Panel
 		Message.Clear();
 		Warning.Clear();
 		Error.Clear();
+		UpdateToolbarState();
 	}
 
 	void OpenLogsFolder()
@@ -171,8 +172,7 @@ public class Console : Panel
 	void OutputLine( string line )
 	{
 		var e = new LogEvent() { Message = $"> {line}", Level = LogLevel.Info, Logger = "in", Time = DateTime.Now };
-		Entries.Add( e );
-		Output.AddItem( e );
+		AddEvent( e );
 		ConsoleSystem.Run( line );
 	}
 
@@ -218,6 +218,7 @@ public class Console : Panel
 			return;
 
 		Input.ClearInput();
+		UpdateToolbarState();
 	}
 
 	protected override void OnMouseDown( MousePanelEvent e )
@@ -226,12 +227,35 @@ public class Console : Panel
 		UnselectAllInChildren();
 	}
 
-	public override void Tick()
+	void UpdateToolbarState()
 	{
-		base.Tick();
-		ScrollConsole?.SetClass( "active", Output?.IsScrollAtBottom ?? false );
 		Input?.SetClass( "empty", string.IsNullOrEmpty( Input.Text ) );
 		Filter?.SetClass( "empty", string.IsNullOrEmpty( Filter.Text ) );
+	}
+
+	void IncrementCategory( LogLevel level )
+	{
+		if ( level == LogLevel.Info || level == LogLevel.Trace )
+		{
+			Message.Count++;
+		}
+		else if ( level == LogLevel.Warn )
+		{
+			Warning.Count++;
+		}
+		else if ( level == LogLevel.Error )
+		{
+			Error.Count++;
+		}
+
+		RefreshCategoryCounts();
+	}
+
+	void RefreshCategoryCounts()
+	{
+		Message.Button.Text = $"{Message.Count:n0}";
+		Warning.Button.Text = $"{Warning.Count:n0}";
+		Error.Button.Text = $"{Error.Count:n0}";
 	}
 
 }

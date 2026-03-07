@@ -2,12 +2,22 @@ namespace Sandbox.UI.Dev;
 
 public class ConsoleTextEntry : TextEntry
 {
+	const int MaxVisibleSuggestions = 32;
+	const int MaxSuggestionRowPool = 48;
+
 	struct SuggestionItem
 	{
 		public string Title;
 		public string Value;
 		public string Command;
 		public string CurrentValue;
+	}
+
+	struct SuggestionRow
+	{
+		public Panel Row;
+		public Label Name;
+		public Label Value;
 	}
 
 	public Func<string, object[]> SuggestionProvider { get; set; }
@@ -20,6 +30,7 @@ public class ConsoleTextEntry : TextEntry
 	SmartArgControlMode smartArgControlMode;
 
 	readonly List<SuggestionItem> suggestionItems = new();
+	readonly List<SuggestionRow> suggestionRows = new();
 	int selectedSuggestionIndex = -1;
 	bool preserveSuggestionListOnce;
 
@@ -179,16 +190,21 @@ public class ConsoleTextEntry : TextEntry
 		{
 			suggestionPanel = Add.Panel( "console-suggestion-menu" );
 			suggestionPanel.SetClass( "hidden", true );
+			suggestionRows.Clear();
 		}
 		suggestionPanel.SetClass( "hidden", false );
 		suggestionPanel.ScrollOffset = 0;
 
-		suggestionPanel.DeleteChildren( true );
 		suggestionItems.Clear();
+		selectedSuggestionIndex = -1;
 		var commandValueCache = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
+		var visibleRowCount = 0;
 
 		foreach ( var option in options )
 		{
+			if ( suggestionItems.Count >= MaxVisibleSuggestions )
+				break;
+
 			var item = ConvertOption( option );
 			if ( string.IsNullOrWhiteSpace( item.Value ) )
 				continue;
@@ -210,13 +226,30 @@ public class ConsoleTextEntry : TextEntry
 			}
 			suggestionItems.Add( item );
 
-			var suggestionValue = item.Value;
-			var row = suggestionPanel.Add.Panel( "suggestion-item" );
-			row.AddChild( new Label( item.Title, "name" ) );
-			row.AddChild( new Label( item.CurrentValue ?? string.Empty, "value" ) );
-			row.AddEventListener( "onclick", () => ApplySuggestion( suggestionValue ) );
-			row.UserData = item;
+			var row = EnsureSuggestionRow( visibleRowCount );
+			row.Name.Text = item.Title;
+			row.Value.Text = item.CurrentValue ?? string.Empty;
+			row.Row.UserData = item;
+			row.Row.Style.Display = DisplayMode.Flex;
+
+			if ( selectedSuggestionIndex < 0 && string.Equals( item.Value, Text, StringComparison.OrdinalIgnoreCase ) )
+				selectedSuggestionIndex = visibleRowCount;
+
+			visibleRowCount++;
 		}
+
+		for ( var i = visibleRowCount; i < suggestionRows.Count; i++ )
+		{
+			var row = suggestionRows[i].Row;
+			if ( !row.IsValid() )
+				continue;
+
+			row.Style.Display = DisplayMode.None;
+			row.UserData = null;
+			row.SetClass( "active", false );
+			row.SetClass( "typed-match", false );
+		}
+		TrimSuggestionRowPool();
 
 		if ( suggestionItems.Count == 0 )
 		{
@@ -224,7 +257,6 @@ public class ConsoleTextEntry : TextEntry
 			return;
 		}
 
-		selectedSuggestionIndex = suggestionItems.FindIndex( x => string.Equals( x.Value, Text, StringComparison.OrdinalIgnoreCase ) );
 		UpdateSelectionClasses();
 		UpdateTypedMatchClasses();
 	}
@@ -232,8 +264,55 @@ public class ConsoleTextEntry : TextEntry
 	void DestroySuggestionPopup()
 	{
 		suggestionPanel?.SetClass( "hidden", true );
+		foreach ( var row in suggestionRows )
+		{
+			if ( row.Row.IsValid() )
+				row.Row.Style.Display = DisplayMode.None;
+		}
 		suggestionItems.Clear();
 		selectedSuggestionIndex = -1;
+		TrimSuggestionRowPool();
+	}
+
+	SuggestionRow EnsureSuggestionRow( int index )
+	{
+		while ( suggestionRows.Count <= index )
+		{
+			var rowPanel = suggestionPanel.Add.Panel( "suggestion-item" );
+			var nameLabel = rowPanel.AddChild( new Label( string.Empty, "name" ) );
+			var valueLabel = rowPanel.AddChild( new Label( string.Empty, "value" ) );
+			rowPanel.AddEventListener( "onclick", () => OnSuggestionRowClicked( rowPanel ) );
+
+			suggestionRows.Add( new SuggestionRow
+			{
+				Row = rowPanel,
+				Name = nameLabel,
+				Value = valueLabel
+			} );
+		}
+
+		return suggestionRows[index];
+	}
+
+	void OnSuggestionRowClicked( Panel row )
+	{
+		if ( row?.UserData is SuggestionItem item && !string.IsNullOrWhiteSpace( item.Value ) )
+			ApplySuggestion( item.Value );
+	}
+
+	void TrimSuggestionRowPool()
+	{
+		if ( suggestionRows.Count <= MaxSuggestionRowPool )
+			return;
+
+		for ( var i = MaxSuggestionRowPool; i < suggestionRows.Count; i++ )
+		{
+			var row = suggestionRows[i].Row;
+			if ( row.IsValid() )
+				row.Delete( true );
+		}
+
+		suggestionRows.RemoveRange( MaxSuggestionRowPool, suggestionRows.Count - MaxSuggestionRowPool );
 	}
 
 	static SuggestionItem ConvertOption( object option )
@@ -689,10 +768,13 @@ public class ConsoleTextEntry : TextEntry
 		if ( !suggestionPanel.IsValid() )
 			return;
 
-		var children = suggestionPanel.Children.ToArray();
-		for ( var i = 0; i < children.Length; i++ )
+		for ( var i = 0; i < suggestionRows.Count; i++ )
 		{
-			children[i]?.SetClass( "active", i == selectedSuggestionIndex );
+			var row = suggestionRows[i].Row;
+			if ( !row.IsValid() || i >= suggestionItems.Count )
+				continue;
+
+			row.SetClass( "active", i == selectedSuggestionIndex );
 		}
 	}
 
@@ -702,14 +784,17 @@ public class ConsoleTextEntry : TextEntry
 			return;
 
 		var typedCommand = ExtractFirstToken( Text );
-		var children = suggestionPanel.Children.ToArray();
-		for ( var i = 0; i < children.Length; i++ )
+		for ( var i = 0; i < suggestionRows.Count; i++ )
 		{
+			var row = suggestionRows[i].Row;
+			if ( !row.IsValid() || i >= suggestionItems.Count )
+				continue;
+
 			var item = i < suggestionItems.Count ? suggestionItems[i] : default;
 			var isTypedMatch = !string.IsNullOrWhiteSpace( typedCommand )
 				&& string.Equals( typedCommand, item.Command, StringComparison.OrdinalIgnoreCase );
 
-			children[i]?.SetClass( "typed-match", isTypedMatch );
+			row.SetClass( "typed-match", isTypedMatch );
 		}
 	}
 
