@@ -4,6 +4,9 @@ ConsoleRow
 {
     flex-shrink: 0;
     flex-grow: 0;
+    height: 20px;
+    min-height: 20px;
+    max-height: 20px;
     width: 100%;
     cursor: pointer;
     align-items: center;
