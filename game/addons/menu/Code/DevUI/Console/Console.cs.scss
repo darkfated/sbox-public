@@ -16,16 +16,14 @@ console
 	backdrop-filter: blur( 8px );
 	outline: 1px solid $default-border;
 
-	.textentry
-	{
-	}
-
 	.console_output
 	{
 		position: relative;
 		z-index: 1;
 		width: 100%;
-		height: 100%;
+		height: auto;
+		min-height: 0;
+		flex-grow: 1;
 		font-size: 10px;
 		font-weight: 500;
 		color: #919aab;

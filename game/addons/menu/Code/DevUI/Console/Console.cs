@@ -38,7 +38,7 @@ public class Console : Panel
 	{
 		Output = AddChild<VirtualList>();
 		Output.AddClass( "console_output" );
-		Output.ItemHeight = 18;
+		Output.ItemHeight = 20;
 		Output.PreferScrollToBottom = true;
 		Output.OnCreateCell = ( Panel cell, object data ) =>
 		{
