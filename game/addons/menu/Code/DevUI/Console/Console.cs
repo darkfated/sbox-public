@@ -80,7 +80,6 @@ public class Console : Panel
 			ScrollConsole = toolbar.AddChild( new Button( null, "arrow_downward", () =>
 			{
 				Output?.TryScrollToBottom();
-				UpdateToolbarState();
 			} ) );
 			ScrollConsole.AddClass( "scroll-down-btn" );
 		}
