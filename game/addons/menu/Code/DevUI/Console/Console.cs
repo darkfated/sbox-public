@@ -155,6 +155,7 @@ public class Console : Panel
 		Sound.Play( "ui.button.press" );
 		Output.Clear();
 		Entries.Clear();
+		logEventPanel?.Clear();
 
 		Message.Clear();
 		Warning.Clear();
