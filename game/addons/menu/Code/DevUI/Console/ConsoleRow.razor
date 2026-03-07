@@ -37,6 +37,17 @@
     protected override void OnMouseDown(MousePanelEvent e)
     {
         base.OnMouseDown(e);
+        var p = Parent;
+        while ( p is not null )
+        {
+            if ( p is Console console )
+            {
+                console.UnselectAllInChildren();
+                break;
+            }
+
+            p = p.Parent;
+        }
 
         e.StopPropagation();
     }
