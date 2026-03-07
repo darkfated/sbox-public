@@ -267,9 +267,10 @@ public class ConsoleTextEntry : TextEntry
 		if ( !suggestionPanel.IsValid() )
 			return;
 
-		for ( var i = 0; i < suggestionPanel.Children.Count(); i++ )
+		var children = suggestionPanel.Children.ToArray();
+		for ( var i = 0; i < children.Length; i++ )
 		{
-			suggestionPanel.Children.ElementAt( i ).SetClass( "active", i == selectedSuggestionIndex );
+			children[i]?.SetClass( "active", i == selectedSuggestionIndex );
 		}
 	}
 
@@ -279,13 +280,14 @@ public class ConsoleTextEntry : TextEntry
 			return;
 
 		var typedCommand = ExtractFirstToken( Text );
-		for ( var i = 0; i < suggestionPanel.Children.Count(); i++ )
+		var children = suggestionPanel.Children.ToArray();
+		for ( var i = 0; i < children.Length; i++ )
 		{
 			var item = i < suggestionItems.Count ? suggestionItems[i] : default;
 			var isTypedMatch = !string.IsNullOrWhiteSpace( typedCommand )
 				&& string.Equals( typedCommand, item.Command, StringComparison.OrdinalIgnoreCase );
 
-			suggestionPanel.Children.ElementAt( i ).SetClass( "typed-match", isTypedMatch );
+			children[i]?.SetClass( "typed-match", isTypedMatch );
 		}
 	}
 
