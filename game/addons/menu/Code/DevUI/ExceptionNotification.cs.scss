@@ -93,6 +93,9 @@
 		border: 1px solid rgba( $default-border, 0.7 );
 		border-radius: $rounding-small;
 		padding: 7px 8px;
+		opacity: 1;
+		transform: translateY( 0px );
+		transition: opacity 0.16s ease, transform 0.16s ease, max-height 0.16s ease, margin 0.16s ease, padding 0.16s ease;
 	}
 
 	.trace
@@ -106,6 +109,14 @@
 
 	&:not(.has-trace) .trace-container
 	{
-		display: none;
+		opacity: 0;
+		transform: translateY( 4px );
+		max-height: 0;
+		margin: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		border-width: 0;
+		pointer-events: none;
+		overflow: hidden;
 	}
 }

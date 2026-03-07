@@ -34,11 +34,158 @@
 		flex-shrink: 1;
 		min-width: 0;
 		color: $default-text;
+		cursor: text;
 	}
 
 	&:active, &:focus, &:hover
 	{
 		border-color: rgba( $primary-blue, 0.45 );
+	}
+}
+
+.command-panel
+{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: calc( -52px - 12px );
+	height: 52px;
+	min-height: 52px;
+	max-height: 52px;
+	padding: 8px 14px;
+	border-radius: $rounding-small;
+	border: 1px solid rgba( $default-border, 0.75 );
+	background-color: rgba( $default-900, 1 );
+	z-index: 10001;
+	gap: 0;
+	cursor: default;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	pointer-events: auto;
+	opacity: 1;
+	transform: translateY( 0px );
+	transition: opacity 0.14s ease, transform 0.14s ease;
+
+	> .header,
+	> .header > .command
+	{
+		cursor: default;
+	}
+
+	> .header
+	{
+		width: calc( 100% - 304px );
+		min-width: 0;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-start;
+		height: 100%;
+		margin-right: auto;
+
+		> .command
+		{
+			font-family: Roboto Mono;
+			font-size: 15px;
+			font-weight: 800;
+			color: #ffffff;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			text-align: left;
+			max-width: 100%;
+		}
+	}
+
+	> .controls
+	{
+		position: absolute;
+		right: 14px;
+		top: 50%;
+		transform: translateY( -50% );
+		align-items: center;
+		justify-content: flex-end;
+		gap: 6px;
+		min-height: 24px;
+		max-width: 276px;
+		pointer-events: auto;
+		cursor: pointer;
+
+		*
+		{
+			cursor: pointer;
+		}
+
+		> .arg-btn
+		{
+			min-width: 48px;
+			height: 24px;
+			padding: 0 9px;
+			border-radius: $rounding-small;
+			border: 1px solid rgba( $default-border, 0.6 );
+			background-color: rgba( $default-700, 0.35 );
+			color: #ffffff;
+			font-family: Roboto Mono;
+			font-size: 11px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: background-color 0.08s ease-out, border-color 0.08s ease-out, color 0.08s ease-out;
+
+			&:hover
+			{
+				background-color: rgba( $default-600, 0.42 );
+			}
+
+			&:active
+			{
+				background-color: rgba( $primary-blue, 0.34 );
+				border-color: rgba( $primary-blue, 0.72 );
+				color: #ffffff;
+			}
+
+			&.secondary
+			{
+				color: rgba( $default-200, 0.92 );
+				background-color: rgba( $default-600, 0.26 );
+				min-width: 74px;
+
+				&:active
+				{
+					background-color: rgba( $primary-blue, 0.3 );
+					border-color: rgba( $primary-blue, 0.68 );
+					color: #ffffff;
+				}
+			}
+
+			&.active
+			{
+				background-color: rgba( $primary-blue, 0.3 );
+				border-color: rgba( $primary-blue, 0.64 );
+			}
+		}
+	}
+
+	&:not(.has-actions)
+	{
+		> .controls
+		{
+			display: none;
+		}
+	}
+
+	&.hidden
+	{
+		opacity: 0;
+		transform: translateY( 4px );
+		pointer-events: none;
+	}
+
+	&.is-bool
+	{
+		> .controls > .arg-btn
+		{
+			min-width: 56px;
+		}
 	}
 }
 
@@ -60,6 +207,16 @@
 	border: 1px solid rgba( $default-border, 0.85 );
 	padding: 6px;
 	z-index: 10000;
+	opacity: 1;
+	transform: translateY( 0px );
+	transition: opacity 0.14s ease, transform 0.14s ease;
+
+	&.hidden
+	{
+		opacity: 0;
+		transform: translateY( 6px );
+		pointer-events: none;
+	}
 
 	> .suggestion-item
 	{
