@@ -11,11 +11,6 @@ consoleoverlay
 	pointer-events: none;
 	z-index: 60;
 
-	&.hidden
-	{
-		display: none;
-	}
-
 	.output
 	{
 		flex-direction: column;

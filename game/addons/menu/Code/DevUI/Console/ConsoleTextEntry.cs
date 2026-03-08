@@ -3,14 +3,12 @@ namespace Sandbox.UI.Dev;
 public class ConsoleTextEntry : TextEntry
 {
 	const int MaxVisibleSuggestions = 32;
-	const int MaxSuggestionRowPool = 48;
 
 	struct SuggestionItem
 	{
 		public string Title;
 		public string Value;
 		public string Command;
-		public string CurrentValue;
 	}
 
 	struct SuggestionRow
@@ -26,13 +24,12 @@ public class ConsoleTextEntry : TextEntry
 	Panel smartArgPanel;
 	Panel smartArgControls;
 	Label smartArgCommandLabel;
-	string smartArgControlCommand;
-	SmartArgControlMode smartArgControlMode;
 
 	readonly List<SuggestionItem> suggestionItems = new();
 	readonly List<SuggestionRow> suggestionRows = new();
 	int selectedSuggestionIndex = -1;
 	bool preserveSuggestionListOnce;
+	bool HasSuggestionItems => suggestionPanel.IsValid() && suggestionItems.Count > 0;
 
 	public ConsoleTextEntry()
 	{
@@ -52,52 +49,43 @@ public class ConsoleTextEntry : TextEntry
 
 	public override void OnButtonTyped( ButtonEvent e )
 	{
-		var button = e.Button;
-
-		if ( button == "tab" )
+		switch ( e.Button )
 		{
-			var parsed = ParseInput( Text );
-			if ( parsed.HasArgumentSlot && BuildCommandPanelModel( parsed ).IsValid )
+			case "tab":
 			{
-				e.StopPropagation = true;
-				return;
+				var parsed = ParseInput( Text );
+				if ( (parsed.ArgumentText != null && BuildCommandPanelModel( parsed ).IsValid) || e.HasShift )
+				{
+					e.StopPropagation = true;
+					return;
+				}
+
+				if ( !suggestionPanel.IsValid() )
+					UpdateSuggestionPopup();
+
+				if ( HasSuggestionItems )
+				{
+					e.StopPropagation = true;
+					MoveSuggestionSelection( 1 );
+					return;
+				}
+
+				break;
 			}
-
-			if ( e.HasShift )
-			{
+			case "up":
+			case "down":
 				e.StopPropagation = true;
+				if ( HasSuggestionItems )
+					MoveSuggestionSelection( e.Button == "up" ? -1 : 1 );
 				return;
-			}
-
-			if ( !suggestionPanel.IsValid() )
-				UpdateSuggestionPopup();
-
-			if ( suggestionPanel.IsValid() && suggestionItems.Count > 0 )
-			{
-				e.StopPropagation = true;
-				MoveSuggestionSelection( 1 );
-				return;
-			}
-		}
-
-		if ( button == "up" || button == "down" )
-		{
-			if ( suggestionPanel.IsValid() && suggestionItems.Count > 0 )
-			{
-				e.StopPropagation = true;
-				MoveSuggestionSelection( button == "up" ? -1 : 1 );
-				return;
-			}
-
-			e.StopPropagation = true;
-			return;
-		}
-
-		if ( button == "escape" && suggestionPanel.IsValid() )
-		{
-			e.StopPropagation = true;
-			DestroySuggestionPopup();
-			return;
+			case "escape":
+				if ( suggestionPanel.IsValid() )
+				{
+					e.StopPropagation = true;
+					DestroySuggestionPopup();
+					return;
+				}
+				break;
 		}
 
 		base.OnButtonTyped( e );
@@ -145,19 +133,18 @@ public class ConsoleTextEntry : TextEntry
 		var hasSecondArgumentInput = firstSeparator >= 0 && !string.IsNullOrWhiteSpace( trimmed[(firstSeparator + 1)..] );
 		var query = hasSecondArgumentInput ? arg : firstToken;
 
-		var entries = MenuUtility.AutoComplete( query, 20 )
+		return MenuUtility.AutoComplete( query, 20 )
 			.GroupBy( x => x.Command, StringComparer.OrdinalIgnoreCase )
 			.Select( x => x.First() )
 			.OrderByDescending( x => string.Equals( x.Command, firstToken, StringComparison.OrdinalIgnoreCase ) )
 			.ThenByDescending( x => x.Command.StartsWith( firstToken, StringComparison.OrdinalIgnoreCase ) )
 			.ThenBy( x => x.Command )
-			.ToList();
-
-		return entries.Select( x => (object)new TextEntry.AutocompleteEntry
-		{
-			Title = x.Command,
-			Value = x.Command
-		} ).ToArray();
+			.Select( x => (object)new TextEntry.AutocompleteEntry
+			{
+				Title = x.Command,
+				Value = x.Command
+			} )
+			.ToArray();
 	}
 
 	void UpdateSuggestionPopup()
@@ -171,15 +158,13 @@ public class ConsoleTextEntry : TextEntry
 		var options = SuggestionProvider( Text ) ?? Array.Empty<object>();
 		if ( options.Length == 0 )
 		{
-			if ( preserveSuggestionListOnce && suggestionPanel.IsValid() && suggestionItems.Count > 0 )
+			if ( preserveSuggestionListOnce && HasSuggestionItems )
 			{
 				preserveSuggestionListOnce = false;
-				UpdateSelectionClasses();
-				UpdateTypedMatchClasses();
+				UpdateSuggestionClasses( updateSelection: true, updateTypedMatch: true );
 				return;
 			}
 
-			preserveSuggestionListOnce = false;
 			DestroySuggestionPopup();
 			return;
 		}
@@ -197,7 +182,6 @@ public class ConsoleTextEntry : TextEntry
 
 		suggestionItems.Clear();
 		selectedSuggestionIndex = -1;
-		var commandValueCache = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
 		var visibleRowCount = 0;
 
 		foreach ( var option in options )
@@ -210,25 +194,14 @@ public class ConsoleTextEntry : TextEntry
 				continue;
 
 			item.Command = ExtractFirstToken( item.Value );
-			if ( string.IsNullOrWhiteSpace( item.Command ) )
-			{
-				item.CurrentValue = null;
-			}
-			else if ( !commandValueCache.TryGetValue( item.Command, out var currentValue ) )
-			{
-				currentValue = ConsoleSystem.GetValue( item.Command );
-				commandValueCache[item.Command] = currentValue;
-				item.CurrentValue = currentValue;
-			}
-			else
-			{
-				item.CurrentValue = currentValue;
-			}
 			suggestionItems.Add( item );
+			var rawCurrentValue = string.IsNullOrWhiteSpace( item.Command )
+				? null
+				: ConsoleSystem.GetValue( item.Command );
 
 			var row = EnsureSuggestionRow( visibleRowCount );
 			row.Name.Text = item.Title;
-			row.Value.Text = item.CurrentValue ?? string.Empty;
+			row.Value.Text = FormatSuggestionValue( rawCurrentValue );
 			row.Row.UserData = item;
 			row.Row.Style.Display = DisplayMode.Flex;
 
@@ -238,17 +211,7 @@ public class ConsoleTextEntry : TextEntry
 			visibleRowCount++;
 		}
 
-		for ( var i = visibleRowCount; i < suggestionRows.Count; i++ )
-		{
-			var row = suggestionRows[i].Row;
-			if ( !row.IsValid() )
-				continue;
-
-			row.Style.Display = DisplayMode.None;
-			row.UserData = null;
-			row.SetClass( "active", false );
-			row.SetClass( "typed-match", false );
-		}
+		HideSuggestionRows( visibleRowCount );
 		TrimSuggestionRowPool();
 
 		if ( suggestionItems.Count == 0 )
@@ -257,21 +220,27 @@ public class ConsoleTextEntry : TextEntry
 			return;
 		}
 
-		UpdateSelectionClasses();
-		UpdateTypedMatchClasses();
+		UpdateSuggestionClasses( updateSelection: true, updateTypedMatch: true );
 	}
 
 	void DestroySuggestionPopup()
 	{
+		preserveSuggestionListOnce = false;
 		suggestionPanel?.SetClass( "hidden", true );
-		foreach ( var row in suggestionRows )
-		{
-			if ( row.Row.IsValid() )
-				row.Row.Style.Display = DisplayMode.None;
-		}
+		HideSuggestionRows();
 		suggestionItems.Clear();
 		selectedSuggestionIndex = -1;
 		TrimSuggestionRowPool();
+	}
+
+	void HideSuggestionRows( int startIndex = 0 )
+	{
+		for ( var i = startIndex; i < suggestionRows.Count; i++ )
+		{
+			var row = suggestionRows[i].Row;
+			if ( row.IsValid() )
+				HideSuggestionRow( row );
+		}
 	}
 
 	SuggestionRow EnsureSuggestionRow( int index )
@@ -281,7 +250,11 @@ public class ConsoleTextEntry : TextEntry
 			var rowPanel = suggestionPanel.Add.Panel( "suggestion-item" );
 			var nameLabel = rowPanel.AddChild( new Label( string.Empty, "name" ) );
 			var valueLabel = rowPanel.AddChild( new Label( string.Empty, "value" ) );
-			rowPanel.AddEventListener( "onclick", () => OnSuggestionRowClicked( rowPanel ) );
+			rowPanel.AddEventListener( "onclick", () =>
+			{
+				if ( rowPanel.UserData is SuggestionItem item && !string.IsNullOrWhiteSpace( item.Value ) )
+					ApplySuggestion( item.Value, true );
+			} );
 
 			suggestionRows.Add( new SuggestionRow
 			{
@@ -294,25 +267,27 @@ public class ConsoleTextEntry : TextEntry
 		return suggestionRows[index];
 	}
 
-	void OnSuggestionRowClicked( Panel row )
-	{
-		if ( row?.UserData is SuggestionItem item && !string.IsNullOrWhiteSpace( item.Value ) )
-			ApplySuggestion( item.Value );
-	}
-
 	void TrimSuggestionRowPool()
 	{
-		if ( suggestionRows.Count <= MaxSuggestionRowPool )
+		if ( suggestionRows.Count <= MaxVisibleSuggestions )
 			return;
 
-		for ( var i = MaxSuggestionRowPool; i < suggestionRows.Count; i++ )
+		for ( var i = MaxVisibleSuggestions; i < suggestionRows.Count; i++ )
 		{
 			var row = suggestionRows[i].Row;
 			if ( row.IsValid() )
 				row.Delete( true );
 		}
 
-		suggestionRows.RemoveRange( MaxSuggestionRowPool, suggestionRows.Count - MaxSuggestionRowPool );
+		suggestionRows.RemoveRange( MaxVisibleSuggestions, suggestionRows.Count - MaxVisibleSuggestions );
+	}
+
+	static void HideSuggestionRow( Panel row )
+	{
+		row.Style.Display = DisplayMode.None;
+		row.UserData = null;
+		row.SetClass( "active", false );
+		row.SetClass( "typed-match", false );
 	}
 
 	static SuggestionItem ConvertOption( object option )
@@ -345,13 +320,8 @@ public class ConsoleTextEntry : TextEntry
 		else
 			selectedSuggestionIndex = (selectedSuggestionIndex + direction + suggestionItems.Count) % suggestionItems.Count;
 
-		UpdateSelectionClasses();
+		UpdateSuggestionClasses( updateSelection: true, updateTypedMatch: false );
 		ApplySuggestion( suggestionItems[selectedSuggestionIndex].Value, false );
-	}
-
-	void ApplySuggestion( string value )
-	{
-		ApplySuggestion( value, true );
 	}
 
 	void ApplySuggestion( string value, bool refreshSuggestions )
@@ -366,7 +336,7 @@ public class ConsoleTextEntry : TextEntry
 		else
 		{
 			preserveSuggestionListOnce = true;
-			UpdateTypedMatchClasses();
+			UpdateSuggestionClasses( updateSelection: false, updateTypedMatch: true );
 		}
 
 		Focus();
@@ -375,11 +345,10 @@ public class ConsoleTextEntry : TextEntry
 	void UpdateInteractivePanels()
 	{
 		var parsed = ParseInput( Text );
-		var hasCommandPanelContext = parsed.HasArgumentSlot && !string.IsNullOrWhiteSpace( parsed.Command );
-		var model = hasCommandPanelContext ? BuildCommandPanelModel( parsed ) : default;
-		var isCommandPanelMode = model.IsValid;
-
-		if ( isCommandPanelMode )
+		var model = parsed.ArgumentText != null
+			? BuildCommandPanelModel( parsed )
+			: default;
+		if ( model.IsValid )
 		{
 			DestroySuggestionPopup();
 			UpdateCommandPanel( model );
@@ -392,33 +361,21 @@ public class ConsoleTextEntry : TextEntry
 
 	void UpdateCommandPanel( SmartArgumentModel model )
 	{
-		if ( !model.IsValid )
-		{
-			DestroyCommandPanel();
-			return;
-		}
-
 		EnsureCommandPanel();
 		smartArgPanel.SetClass( "hidden", false );
 		smartArgCommandLabel.Text = model.Command;
 		smartArgPanel.SetClass( "is-bool", model.IsBoolean );
 		smartArgPanel.SetClass( "has-actions", model.IsBoolean || model.IsNumeric );
+		smartArgControls.DeleteChildren( true );
 
-		var targetMode = model.IsBoolean ? SmartArgControlMode.Boolean
-			: model.IsNumeric ? SmartArgControlMode.Numeric
-			: SmartArgControlMode.None;
-
-		var sameCommand = string.Equals( smartArgControlCommand, model.Command, StringComparison.OrdinalIgnoreCase );
-		var needsRebuild = !smartArgControls.IsValid() || !sameCommand || smartArgControlMode != targetMode;
-
-		if ( needsRebuild )
+		if ( model.IsBoolean )
 		{
-			RebuildCommandControls( model, targetMode );
+			BuildBooleanControls( model );
+			return;
 		}
-		else if ( targetMode == SmartArgControlMode.Boolean )
-		{
-			UpdateBooleanControlState( model );
-		}
+
+		if ( model.IsNumeric )
+			BuildNumericControls( model );
 	}
 
 	void EnsureCommandPanel()
@@ -441,54 +398,18 @@ public class ConsoleTextEntry : TextEntry
 			return;
 
 		smartArgPanel.SetClass( "hidden", true );
-		smartArgControls?.DeleteChildren( true );
-		smartArgControlCommand = null;
-		smartArgControlMode = SmartArgControlMode.None;
-	}
-
-	void RebuildCommandControls( SmartArgumentModel model, SmartArgControlMode mode )
-	{
-		if ( !smartArgControls.IsValid() )
-			return;
-
-		smartArgControls.DeleteChildren( true );
-
-		if ( mode == SmartArgControlMode.Boolean )
-		{
-			BuildBooleanControls( model );
-		}
-		else if ( mode == SmartArgControlMode.Numeric )
-		{
-			BuildNumericControls( model );
-		}
-
-		smartArgControlCommand = model.Command;
-		smartArgControlMode = mode;
-	}
-
-	void UpdateBooleanControlState( SmartArgumentModel model )
-	{
-		if ( !smartArgControls.IsValid() )
-			return;
-
-		var children = smartArgControls.Children.ToArray();
-		if ( children.Length < 2 )
-			return;
-
-		var hasExplicitTypedBool = model.HasTypedBool;
-		var effectiveBool = hasExplicitTypedBool ? model.TypedBool : model.CurrentBool;
-
-		var offButton = children[0];
-		var onButton = children[1];
-		offButton?.SetClass( "active", hasExplicitTypedBool && !effectiveBool );
-		onButton?.SetClass( "active", hasExplicitTypedBool && effectiveBool );
 	}
 
 	void BuildBooleanControls( SmartArgumentModel model )
 	{
-		AddSmartArgButton( "OFF", () => SetInputArgumentValue( model.Command, model.FalseToken ) );
-		AddSmartArgButton( "ON", () => SetInputArgumentValue( model.Command, model.TrueToken ) );
-		UpdateBooleanControlState( model );
+		var offButton = AddSmartArgButton( "OFF", () => SetInputArgumentValue( model.Command, "0" ) );
+		var onButton = AddSmartArgButton( "ON", () => SetInputArgumentValue( model.Command, "1" ) );
+
+		if ( !model.HasTypedBool )
+			return;
+
+		offButton.SetClass( "active", !model.TypedBool );
+		onButton.SetClass( "active", model.TypedBool );
 	}
 
 	void BuildNumericControls( SmartArgumentModel model )
@@ -497,17 +418,19 @@ public class ConsoleTextEntry : TextEntry
 		var decimals = effectiveModel.DecimalPlaces;
 		var smallStep = decimals > 0 ? 0.1 : 1.0;
 		var largeStep = smallStep * 10.0;
+		var smallStepLabel = decimals > 0 ? "0.1" : "1";
+		var largeStepLabel = decimals > 0 ? "1" : "10";
 
-		AddSmartArgButton( $"-{FormatStep( largeStep )}", () => ShiftNumericArgument( effectiveModel, -largeStep ) );
-		AddSmartArgButton( $"-{FormatStep( smallStep )}", () => ShiftNumericArgument( effectiveModel, -smallStep ) );
+		AddSmartArgButton( $"-{largeStepLabel}", () => ShiftNumericArgument( effectiveModel, -largeStep ) );
+		AddSmartArgButton( $"-{smallStepLabel}", () => ShiftNumericArgument( effectiveModel, -smallStep ) );
 		var currentButton = AddSmartArgButton( "current", () =>
 		{
 			var currentValue = ConsoleSystem.GetValue( effectiveModel.Command, effectiveModel.CurrentValue ) ?? effectiveModel.CurrentValue;
 			SetInputArgumentValue( effectiveModel.Command, currentValue );
 		} );
-		currentButton?.AddClass( "secondary" );
-		AddSmartArgButton( $"+{FormatStep( smallStep )}", () => ShiftNumericArgument( effectiveModel, smallStep ) );
-		AddSmartArgButton( $"+{FormatStep( largeStep )}", () => ShiftNumericArgument( effectiveModel, largeStep ) );
+		currentButton.AddClass( "secondary" );
+		AddSmartArgButton( $"+{smallStepLabel}", () => ShiftNumericArgument( effectiveModel, smallStep ) );
+		AddSmartArgButton( $"+{largeStepLabel}", () => ShiftNumericArgument( effectiveModel, largeStep ) );
 	}
 
 	void ShiftNumericArgument( SmartArgumentModel model, double delta )
@@ -515,15 +438,18 @@ public class ConsoleTextEntry : TextEntry
 		var effectiveModel = ResolveLatestNumericModel( model );
 		var baseValue = effectiveModel.HasTypedNumber ? effectiveModel.TypedNumber : effectiveModel.CurrentNumber;
 		var result = baseValue + delta;
-
-		var formatted = FormatNumber( result, effectiveModel.DecimalPlaces );
+		var decimals = Math.Clamp( effectiveModel.DecimalPlaces, 0, 4 );
+		var rounded = Math.Round( result, decimals );
+		var formatted = decimals == 0
+			? rounded.ToString( System.Globalization.CultureInfo.InvariantCulture )
+			: rounded.ToString( $"0.{new string( '#', decimals )}", System.Globalization.CultureInfo.InvariantCulture );
 		SetInputArgumentValue( effectiveModel.Command, formatted );
 	}
 
 	SmartArgumentModel ResolveLatestNumericModel( SmartArgumentModel fallback )
 	{
 		var parsed = ParseInput( Text );
-		if ( !parsed.HasArgumentSlot || !string.Equals( parsed.Command, fallback.Command, StringComparison.OrdinalIgnoreCase ) )
+		if ( parsed.ArgumentText == null || !string.Equals( parsed.Command, fallback.Command, StringComparison.OrdinalIgnoreCase ) )
 			return fallback;
 
 		var latest = BuildCommandPanelModel( parsed );
@@ -532,9 +458,6 @@ public class ConsoleTextEntry : TextEntry
 
 	Button AddSmartArgButton( string text, Action onClick )
 	{
-		if ( !smartArgControls.IsValid() )
-			return null;
-
 		var button = smartArgControls.AddChild( new Button( text, onClick ) );
 		button.AddClass( "arg-btn" );
 		return button;
@@ -566,29 +489,12 @@ public class ConsoleTextEntry : TextEntry
 		return text;
 	}
 
-	static string FormatStep( double step )
-	{
-		if ( Math.Abs( step % 1d ) < 0.000001d )
-			return ((int)Math.Round( step )).ToString( System.Globalization.CultureInfo.InvariantCulture );
-
-		return step.ToString( "0.##", System.Globalization.CultureInfo.InvariantCulture );
-	}
-
-	static string FormatNumber( double value, int decimals )
-	{
-		if ( decimals <= 0 )
-			return Math.Round( value ).ToString( System.Globalization.CultureInfo.InvariantCulture );
-
-		var clampedDecimals = Math.Clamp( decimals, 1, 4 );
-		var format = $"0.{new string( '#', clampedDecimals )}";
-		return value.ToString( format, System.Globalization.CultureInfo.InvariantCulture );
-	}
-
 	SmartArgumentModel BuildCommandPanelModel( ParsedInput parsed )
 	{
 		var currentValue = ConsoleSystem.GetValue( parsed.Command, null );
 		if ( string.IsNullOrWhiteSpace( currentValue ) )
 			return default;
+		var hasTypedArgument = !string.IsNullOrWhiteSpace( parsed.ArgumentText );
 
 		var model = new SmartArgumentModel
 		{
@@ -597,14 +503,11 @@ public class ConsoleTextEntry : TextEntry
 			CurrentValue = currentValue,
 		};
 
-		if ( TryParseBoolToken( currentValue, out var currentBool ) )
+		if ( TryParseBoolToken( currentValue, out _ ) )
 		{
 			model.IsBoolean = true;
-			model.CurrentBool = currentBool;
-			model.TrueToken = UsesNumericBooleanToken( currentValue ) ? "1" : "true";
-			model.FalseToken = UsesNumericBooleanToken( currentValue ) ? "0" : "false";
 
-			if ( parsed.HasArgument && TryParseBoolToken( parsed.ArgumentText, out var typedBool ) )
+			if ( hasTypedArgument && TryParseBoolToken( parsed.ArgumentText, out var typedBool ) )
 			{
 				model.HasTypedBool = true;
 				model.TypedBool = typedBool;
@@ -617,9 +520,9 @@ public class ConsoleTextEntry : TextEntry
 		{
 			model.IsNumeric = true;
 			model.CurrentNumber = currentNumber;
-			model.DecimalPlaces = Math.Max( 0, CountDecimalPlaces( currentValue ) );
+			model.DecimalPlaces = CountDecimalPlaces( currentValue );
 
-			if ( parsed.HasArgument && TryParseNumberToken( parsed.ArgumentText, out var typedNumber ) )
+			if ( hasTypedArgument && TryParseNumberToken( parsed.ArgumentText, out var typedNumber ) )
 			{
 				model.HasTypedNumber = true;
 				model.TypedNumber = typedNumber;
@@ -643,36 +546,33 @@ public class ConsoleTextEntry : TextEntry
 
 	static bool TryParseBoolToken( string value, out bool result )
 	{
-		result = false;
 		if ( string.IsNullOrWhiteSpace( value ) )
+		{
+			result = false;
 			return false;
+		}
 
 		var raw = value.Trim();
-		if ( bool.TryParse( raw, out result ) )
-			return true;
-
-		switch ( raw.ToLowerInvariant() )
+		if ( raw == "1" )
 		{
-			case "1":
-			case "on":
-			case "yes":
-				result = true;
-				return true;
-			case "0":
-			case "off":
-			case "no":
-				result = false;
-				return true;
-			default:
-				return false;
+			result = true;
+			return true;
 		}
+		if ( raw == "0" )
+		{
+			result = false;
+			return true;
+		}
+		result = false;
+		return false;
 	}
 
-	static bool UsesNumericBooleanToken( string value )
+	static string FormatSuggestionValue( string rawValue )
 	{
-		var raw = value?.Trim();
-		return string.Equals( raw, "0", StringComparison.OrdinalIgnoreCase )
-			|| string.Equals( raw, "1", StringComparison.OrdinalIgnoreCase );
+		if ( TryParseBoolToken( rawValue, out var boolValue ) )
+			return boolValue ? "True" : "False";
+
+		return rawValue ?? string.Empty;
 	}
 
 	static int CountDecimalPlaces( string value )
@@ -698,10 +598,7 @@ public class ConsoleTextEntry : TextEntry
 
 	static ParsedInput ParseInput( string text )
 	{
-		if ( string.IsNullOrWhiteSpace( text ) )
-			return default;
-
-		var trimmed = text.TrimStart();
+		var trimmed = text?.TrimStart();
 		if ( string.IsNullOrWhiteSpace( trimmed ) )
 			return default;
 
@@ -710,21 +607,16 @@ public class ConsoleTextEntry : TextEntry
 		{
 			return new ParsedInput
 			{
-				Command = trimmed,
-				HasArgumentSlot = false
+				Command = trimmed
 			};
 		}
 
-		var command = trimmed[..separator];
 		var argument = trimmed[(separator + 1)..];
-		var hasArgument = !string.IsNullOrWhiteSpace( argument );
 
 		return new ParsedInput
 		{
-			Command = command,
-			ArgumentText = hasArgument ? argument.Trim() : string.Empty,
-			HasArgument = hasArgument,
-			HasArgumentSlot = true
+			Command = trimmed[..separator],
+			ArgumentText = argument.Trim()
 		};
 	}
 
@@ -732,8 +624,6 @@ public class ConsoleTextEntry : TextEntry
 	{
 		public string Command;
 		public string ArgumentText;
-		public bool HasArgument;
-		public bool HasArgumentSlot;
 	}
 
 	struct SmartArgumentModel
@@ -743,11 +633,8 @@ public class ConsoleTextEntry : TextEntry
 		public string CurrentValue;
 
 		public bool IsBoolean;
-		public bool CurrentBool;
 		public bool HasTypedBool;
 		public bool TypedBool;
-		public string TrueToken;
-		public string FalseToken;
 
 		public bool IsNumeric;
 		public double CurrentNumber;
@@ -756,44 +643,31 @@ public class ConsoleTextEntry : TextEntry
 		public int DecimalPlaces;
 	}
 
-	enum SmartArgControlMode
-	{
-		None,
-		Boolean,
-		Numeric
-	}
-
-	void UpdateSelectionClasses()
+	void UpdateSuggestionClasses( bool updateSelection, bool updateTypedMatch )
 	{
 		if ( !suggestionPanel.IsValid() )
 			return;
 
-		for ( var i = 0; i < suggestionRows.Count; i++ )
+		var typedCommand = updateTypedMatch ? ExtractFirstToken( Text ) : string.Empty;
+		var hasTypedCommand = !string.IsNullOrWhiteSpace( typedCommand );
+		var count = Math.Min( suggestionRows.Count, suggestionItems.Count );
+		for ( var i = 0; i < count; i++ )
 		{
 			var row = suggestionRows[i].Row;
-			if ( !row.IsValid() || i >= suggestionItems.Count )
+			if ( !row.IsValid() )
 				continue;
 
-			row.SetClass( "active", i == selectedSuggestionIndex );
-		}
-	}
+			if ( updateSelection )
+			{
+				row.SetClass( "active", i == selectedSuggestionIndex );
+			}
 
-	void UpdateTypedMatchClasses()
-	{
-		if ( !suggestionPanel.IsValid() )
-			return;
-
-		var typedCommand = ExtractFirstToken( Text );
-		for ( var i = 0; i < suggestionRows.Count; i++ )
-		{
-			var row = suggestionRows[i].Row;
-			if ( !row.IsValid() || i >= suggestionItems.Count )
+			if ( !updateTypedMatch )
 				continue;
 
-			var item = i < suggestionItems.Count ? suggestionItems[i] : default;
-			var isTypedMatch = !string.IsNullOrWhiteSpace( typedCommand )
+			var item = suggestionItems[i];
+			var isTypedMatch = hasTypedCommand
 				&& string.Equals( typedCommand, item.Command, StringComparison.OrdinalIgnoreCase );
-
 			row.SetClass( "typed-match", isTypedMatch );
 		}
 	}
