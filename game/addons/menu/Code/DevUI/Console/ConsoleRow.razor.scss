@@ -42,7 +42,6 @@ ConsoleRow
     .message
     {
         white-space: nowrap;
-        color: #919aab;
     }
 
     &.Trace
@@ -78,35 +77,31 @@ ConsoleRow
         color: $default-text;
     }
 
-    .message > label,
+    .message,
     .message *
     {
         color: #919aab;
     }
 
     &.Warn .message,
-    &.Warn .message > label,
     &.Warn .message *
     {
         color: #ffd75d;
     }
 
     &.Error .message,
-    &.Error .message > label,
     &.Error .message *
     {
         color: #ff6f7c;
     }
 
     &.in .message,
-    &.in .message > label,
     &.in .message *
     {
         color: $primary-blue;
     }
 
     &.highlight .message,
-    &.highlight .message > label,
     &.highlight .message *
     {
         color: $default-text;

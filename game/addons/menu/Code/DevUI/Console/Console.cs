@@ -3,11 +3,12 @@
 [Library( "console" )]
 public class Console : Panel
 {
+	static readonly char[] LineSeparators = new[] { '\n', '\r' };
+
 	internal List<LogEvent> Entries = new();
 	internal VirtualList Output;
 	internal ConsoleTextEntry Input;
 	internal TextEntry Filter;
-	internal Button ScrollConsole;
 	readonly List<object> filteredEntries = new();
 
 	LogEventPanel logEventPanel;
@@ -56,7 +57,6 @@ public class Console : Panel
 		{
 			Input = toolbar.AddChild<ConsoleTextEntry>();
 			Input.AddEventListener( "onsubmit", OnSubmit );
-			Input.AddEventListener( "onchange", UpdateToolbarState );
 			Input.Placeholder = "Run command";
 			Input.SuggestionProvider = Input.FillAutoComplete;
 			Input.HistoryCookie = "console-input-history";
@@ -77,37 +77,34 @@ public class Console : Panel
 
 			toolbar.AddChild( new Button( "logs", () => OpenLogsFolder() ) );
 			toolbar.AddChild( new Button( "clear", () => OnClear() ) );
-			ScrollConsole = toolbar.AddChild( new Button( null, "arrow_downward", () =>
+			var scrollConsole = toolbar.AddChild( new Button( null, "arrow_downward", () =>
 			{
 				Output?.TryScrollToBottom();
 			} ) );
-			ScrollConsole.AddClass( "scroll-down-btn" );
+			scrollConsole.AddClass( "scroll-down-btn" );
 		}
 
 		MenuUtility.AddLogger( OnConsoleMessage );
 
 		Output.AcceptsFocus = true;
 		Output.AllowChildSelection = true;
-		UpdateToolbarState();
 
 	}
 
 	private void OnConsoleMessage( LogEvent e )
 	{
-		if ( e.Message.Contains( '\n' ) || e.Message.Contains( '\r' ) )
-		{
-			var parts = e.Message.Split( new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries );
-			foreach ( var part in parts )
-			{
-				var ee = e;
-				ee.Message = part;
-
-				AddEvent( ee );
-			}
-		}
-		else
+		var message = e.Message;
+		if ( string.IsNullOrEmpty( message ) || message.IndexOfAny( LineSeparators ) < 0 )
 		{
 			AddEvent( e );
+			return;
+		}
+
+		foreach ( var line in message.Split( LineSeparators, StringSplitOptions.RemoveEmptyEntries ) )
+		{
+			var split = e;
+			split.Message = line;
+			AddEvent( split );
 		}
 	}
 
@@ -120,7 +117,6 @@ public class Console : Panel
 		{
 			Output.AddItem( e );
 		}
-		UpdateToolbarState();
 	}
 
 	void OnFilter()
@@ -134,7 +130,6 @@ public class Console : Panel
 		}
 
 		Output.SetItems( filteredEntries );
-		UpdateToolbarState();
 	}
 
 	bool ShouldShowEvent( LogEvent e )
@@ -160,7 +155,6 @@ public class Console : Panel
 		Message.Clear();
 		Warning.Clear();
 		Error.Clear();
-		UpdateToolbarState();
 	}
 
 	void OpenLogsFolder()
@@ -178,38 +172,34 @@ public class Console : Panel
 
 	void OnSubmit()
 	{
-		var t = Input.Text;
-		if ( string.IsNullOrWhiteSpace( t ) )
+		var text = Input.Text;
+		if ( string.IsNullOrWhiteSpace( text ) )
 		{
 			ClearInput();
 			return;
 		}
 
-		if ( t == "clear" )
+		foreach ( var line in text.Split( LineSeparators, StringSplitOptions.RemoveEmptyEntries ) )
 		{
-			OnClear();
-		}
-		else
-		{
-			if ( t.Contains( '\n' ) || t.Contains( '\r' ) )
-			{
-				var parts = t.Split( new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries );
-				foreach ( var part in parts )
-				{
-					OutputLine( part );
-				}
-			}
-			else
-			{
-				OutputLine( t );
-			}
+			ExecuteSubmittedLine( line );
 		}
 
 		Output.TryScrollToBottom();
 
-		Input.AddToHistory( t );
+		Input.AddToHistory( text );
 		ClearInput();
 		Input.FocusInput();
+	}
+
+	void ExecuteSubmittedLine( string line )
+	{
+		if ( line == "clear" )
+		{
+			OnClear();
+			return;
+		}
+
+		OutputLine( line );
 	}
 
 	void ClearInput()
@@ -218,19 +208,12 @@ public class Console : Panel
 			return;
 
 		Input.ClearInput();
-		UpdateToolbarState();
 	}
 
 	protected override void OnMouseDown( MousePanelEvent e )
 	{
 		base.OnMouseDown( e );
 		UnselectAllInChildren();
-	}
-
-	void UpdateToolbarState()
-	{
-		Input?.SetClass( "empty", string.IsNullOrEmpty( Input.Text ) );
-		Filter?.SetClass( "empty", string.IsNullOrEmpty( Filter.Text ) );
 	}
 
 	void IncrementCategory( LogLevel level )

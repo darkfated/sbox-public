@@ -62,7 +62,6 @@
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
-	pointer-events: auto;
 	opacity: 1;
 	transform: translateY( 0px );
 	transition: opacity 0.14s ease, transform 0.14s ease;
@@ -108,13 +107,6 @@
 		gap: 6px;
 		min-height: 24px;
 		max-width: 276px;
-		pointer-events: auto;
-		cursor: pointer;
-
-		*
-		{
-			cursor: pointer;
-		}
 
 		> .arg-btn
 		{
@@ -251,7 +243,6 @@
 			flex-shrink: 1;
 			min-width: 0;
 			white-space: nowrap;
-			color: #ffffff;
 		}
 
 		> .value
@@ -270,7 +261,6 @@
 
 		&.active
 		{
-			color: #ffffff;
 			background-color: rgba( $default-500, 0.2 );
 			border-color: rgba( $default-border, 0.9 );
 		}
@@ -282,9 +272,7 @@
 
 			> .name
 			{
-				color: #ffffff;
 			}
-
 			> .value
 			{
 				color: rgba( $default-200, 0.86 );
