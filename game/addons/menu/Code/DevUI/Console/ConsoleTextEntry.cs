@@ -11,13 +11,6 @@ public class ConsoleTextEntry : TextEntry
 		public string Command;
 	}
 
-	struct SuggestionRow
-	{
-		public Panel Row;
-		public Label Name;
-		public Label Value;
-	}
-
 	public Func<string, object[]> SuggestionProvider { get; set; }
 
 	Panel suggestionPanel;
@@ -26,7 +19,7 @@ public class ConsoleTextEntry : TextEntry
 	Label smartArgCommandLabel;
 
 	readonly List<SuggestionItem> suggestionItems = new();
-	readonly List<SuggestionRow> suggestionRows = new();
+	readonly List<Panel> suggestionRows = new();
 	int selectedSuggestionIndex = -1;
 	bool preserveSuggestionListOnce;
 	bool HasSuggestionItems => suggestionPanel.IsValid() && suggestionItems.Count > 0;
@@ -175,14 +168,14 @@ public class ConsoleTextEntry : TextEntry
 		{
 			suggestionPanel = Add.Panel( "console-suggestion-menu" );
 			suggestionPanel.SetClass( "hidden", true );
-			suggestionRows.Clear();
 		}
-		suggestionPanel.SetClass( "hidden", false );
+		suggestionPanel.SetClass( "hidden", true );
 		suggestionPanel.ScrollOffset = 0;
+		suggestionPanel.DeleteChildren();
 
 		suggestionItems.Clear();
+		suggestionRows.Clear();
 		selectedSuggestionIndex = -1;
-		var visibleRowCount = 0;
 
 		foreach ( var option in options )
 		{
@@ -199,20 +192,20 @@ public class ConsoleTextEntry : TextEntry
 				? null
 				: ConsoleSystem.GetValue( item.Command );
 
-			var row = EnsureSuggestionRow( visibleRowCount );
-			row.Name.Text = item.Title;
-			row.Value.Text = FormatSuggestionValue( rawCurrentValue );
-			row.Row.UserData = item;
-			row.Row.Style.Display = DisplayMode.Flex;
+			var rowPanel = suggestionPanel.Add.Panel( "suggestion-item" );
+			rowPanel.AddChild( new Label( item.Title, "name" ) );
+			rowPanel.AddChild( new Label( FormatSuggestionValue( rawCurrentValue ), "value" ) );
+			rowPanel.UserData = item;
+			rowPanel.AddEventListener( "onclick", () =>
+			{
+				if ( rowPanel.UserData is SuggestionItem selected && !string.IsNullOrWhiteSpace( selected.Value ) )
+					ApplySuggestion( selected.Value, true );
+			} );
+			suggestionRows.Add( rowPanel );
 
 			if ( selectedSuggestionIndex < 0 && string.Equals( item.Value, Text, StringComparison.OrdinalIgnoreCase ) )
-				selectedSuggestionIndex = visibleRowCount;
-
-			visibleRowCount++;
+				selectedSuggestionIndex = suggestionItems.Count - 1;
 		}
-
-		HideSuggestionRows( visibleRowCount );
-		TrimSuggestionRowPool();
 
 		if ( suggestionItems.Count == 0 )
 		{
@@ -220,74 +213,21 @@ public class ConsoleTextEntry : TextEntry
 			return;
 		}
 
+		suggestionPanel.SetClass( "hidden", false );
 		UpdateSuggestionClasses( updateSelection: true, updateTypedMatch: true );
 	}
 
 	void DestroySuggestionPopup()
 	{
 		preserveSuggestionListOnce = false;
-		suggestionPanel?.SetClass( "hidden", true );
-		HideSuggestionRows();
+		if ( suggestionPanel.IsValid() )
+		{
+			suggestionPanel.SetClass( "hidden", true );
+			suggestionPanel.DeleteChildren();
+		}
 		suggestionItems.Clear();
+		suggestionRows.Clear();
 		selectedSuggestionIndex = -1;
-		TrimSuggestionRowPool();
-	}
-
-	void HideSuggestionRows( int startIndex = 0 )
-	{
-		for ( var i = startIndex; i < suggestionRows.Count; i++ )
-		{
-			var row = suggestionRows[i].Row;
-			if ( row.IsValid() )
-				HideSuggestionRow( row );
-		}
-	}
-
-	SuggestionRow EnsureSuggestionRow( int index )
-	{
-		while ( suggestionRows.Count <= index )
-		{
-			var rowPanel = suggestionPanel.Add.Panel( "suggestion-item" );
-			var nameLabel = rowPanel.AddChild( new Label( string.Empty, "name" ) );
-			var valueLabel = rowPanel.AddChild( new Label( string.Empty, "value" ) );
-			rowPanel.AddEventListener( "onclick", () =>
-			{
-				if ( rowPanel.UserData is SuggestionItem item && !string.IsNullOrWhiteSpace( item.Value ) )
-					ApplySuggestion( item.Value, true );
-			} );
-
-			suggestionRows.Add( new SuggestionRow
-			{
-				Row = rowPanel,
-				Name = nameLabel,
-				Value = valueLabel
-			} );
-		}
-
-		return suggestionRows[index];
-	}
-
-	void TrimSuggestionRowPool()
-	{
-		if ( suggestionRows.Count <= MaxVisibleSuggestions )
-			return;
-
-		for ( var i = MaxVisibleSuggestions; i < suggestionRows.Count; i++ )
-		{
-			var row = suggestionRows[i].Row;
-			if ( row.IsValid() )
-				row.Delete( true );
-		}
-
-		suggestionRows.RemoveRange( MaxVisibleSuggestions, suggestionRows.Count - MaxVisibleSuggestions );
-	}
-
-	static void HideSuggestionRow( Panel row )
-	{
-		row.Style.Display = DisplayMode.None;
-		row.UserData = null;
-		row.SetClass( "active", false );
-		row.SetClass( "typed-match", false );
 	}
 
 	static SuggestionItem ConvertOption( object option )
@@ -653,7 +593,7 @@ public class ConsoleTextEntry : TextEntry
 		var count = Math.Min( suggestionRows.Count, suggestionItems.Count );
 		for ( var i = 0; i < count; i++ )
 		{
-			var row = suggestionRows[i].Row;
+			var row = suggestionRows[i];
 			if ( !row.IsValid() )
 				continue;
 
