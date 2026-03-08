@@ -42,43 +42,39 @@ public class ConsoleTextEntry : TextEntry
 
 	public override void OnButtonTyped( ButtonEvent e )
 	{
-		switch ( e.Button )
+		if ( e.Button == "tab" )
 		{
-			case "tab":
+			var parsed = ParseInput( Text );
+			if ( (parsed.ArgumentText != null && BuildCommandPanelModel( parsed ).IsValid) || e.HasShift )
 			{
-				var parsed = ParseInput( Text );
-				if ( (parsed.ArgumentText != null && BuildCommandPanelModel( parsed ).IsValid) || e.HasShift )
-				{
-					e.StopPropagation = true;
-					return;
-				}
-
-				if ( !suggestionPanel.IsValid() )
-					UpdateSuggestionPopup();
-
-				if ( HasSuggestionItems )
-				{
-					e.StopPropagation = true;
-					MoveSuggestionSelection( 1 );
-					return;
-				}
-
-				break;
-			}
-			case "up":
-			case "down":
 				e.StopPropagation = true;
-				if ( HasSuggestionItems )
-					MoveSuggestionSelection( e.Button == "up" ? -1 : 1 );
 				return;
-			case "escape":
-				if ( suggestionPanel.IsValid() )
-				{
-					e.StopPropagation = true;
-					DestroySuggestionPopup();
-					return;
-				}
-				break;
+			}
+
+			if ( !suggestionPanel.IsValid() )
+				UpdateSuggestionPopup();
+
+			if ( HasSuggestionItems )
+			{
+				e.StopPropagation = true;
+				MoveSuggestionSelection( 1 );
+				return;
+			}
+		}
+
+		if ( e.Button == "up" || e.Button == "down" )
+		{
+			e.StopPropagation = true;
+			if ( HasSuggestionItems )
+				MoveSuggestionSelection( e.Button == "up" ? -1 : 1 );
+			return;
+		}
+
+		if ( e.Button == "escape" && suggestionPanel.IsValid() )
+		{
+			e.StopPropagation = true;
+			DestroySuggestionPopup();
+			return;
 		}
 
 		base.OnButtonTyped( e );
