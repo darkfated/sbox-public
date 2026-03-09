@@ -5,7 +5,7 @@ public class Console : Panel
 {
 	internal List<LogEvent> Entries = new();
 	internal VirtualList Output;
-	internal ConsoleTextEntry Input;
+	internal ConsoleInput Input;
 	internal TextEntry Filter;
 	readonly List<object> filteredEntries = new();
 
@@ -53,7 +53,7 @@ public class Console : Panel
 
 		var toolbar = Add.Panel( "toolbar" );
 		{
-			Input = toolbar.AddChild<ConsoleTextEntry>();
+			Input = toolbar.AddChild<ConsoleInput>();
 			Input.AddEventListener( "onsubmit", OnSubmit );
 			Input.Placeholder = "Run command";
 			Input.SuggestionProvider = Input.FillAutoComplete;
