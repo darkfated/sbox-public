@@ -3,8 +3,6 @@
 [Library( "console" )]
 public class Console : Panel
 {
-	static readonly char[] LineSeparators = new[] { '\n', '\r' };
-
 	internal List<LogEvent> Entries = new();
 	internal VirtualList Output;
 	internal ConsoleTextEntry Input;
@@ -93,18 +91,20 @@ public class Console : Panel
 
 	private void OnConsoleMessage( LogEvent e )
 	{
-		var message = e.Message;
-		if ( string.IsNullOrEmpty( message ) || message.IndexOfAny( LineSeparators ) < 0 )
+		if ( e.Message.Contains( '\n' ) || e.Message.Contains( '\r' ) )
+		{
+			var parts = e.Message.Split( new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries );
+			foreach ( var part in parts )
+			{
+				var ee = e;
+				ee.Message = part;
+
+				AddEvent( ee );
+			}
+		}
+		else
 		{
 			AddEvent( e );
-			return;
-		}
-
-		foreach ( var line in message.Split( LineSeparators, StringSplitOptions.RemoveEmptyEntries ) )
-		{
-			var split = e;
-			split.Message = line;
-			AddEvent( split );
 		}
 	}
 
@@ -172,21 +172,36 @@ public class Console : Panel
 
 	void OnSubmit()
 	{
-		var text = Input.Text;
-		if ( string.IsNullOrWhiteSpace( text ) )
+		var t = Input.Text;
+		if ( string.IsNullOrWhiteSpace( t ) )
 		{
 			ClearInput();
 			return;
 		}
 
-		foreach ( var line in text.Split( LineSeparators, StringSplitOptions.RemoveEmptyEntries ) )
+		if ( t == "clear" )
 		{
-			ExecuteSubmittedLine( line );
+			OnClear();
+		}
+		else
+		{
+			if ( t.Contains( '\n' ) || t.Contains( '\r' ) )
+			{
+				var parts = t.Split( new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries );
+				foreach ( var part in parts )
+				{
+					OutputLine( part );
+				}
+			}
+			else
+			{
+				OutputLine( t );
+			}
 		}
 
 		Output.TryScrollToBottom();
 
-		Input.AddToHistory( text );
+		Input.AddToHistory( t );
 		ClearInput();
 		Input.FocusInput();
 	}
@@ -240,5 +255,4 @@ public class Console : Panel
 		Warning.Button.Text = $"{Warning.Count:n0}";
 		Error.Button.Text = $"{Error.Count:n0}";
 	}
-
 }
