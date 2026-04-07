@@ -693,7 +693,8 @@ partial class GameObjectNode : TreeNode<GameObject>
 
 						foreach ( var go in selectedGos )
 						{
-							if ( go.IsPrefabInstanceRoot )
+							// Nested roots must go through ApplyGameObjectInstanceChangesToPrefab, not WriteInstanceToPrefab.
+							if ( EditorUtility.Prefabs.IsOuterMostPrefabRoot( go ) )
 							{
 								EditorUtility.Prefabs.WriteInstanceToPrefab( go );
 							}

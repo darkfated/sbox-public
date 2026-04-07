@@ -298,9 +298,15 @@ public static partial class EditorUtility
 			if ( !go.IsValid() ) return;
 			if ( !go.IsPrefabInstance ) return;
 
-			var prefabSource = go.OutermostPrefabInstanceRoot.PrefabInstanceSource;
+			if ( !go.IsOutermostPrefabInstanceRoot )
+			{
+				// Nested roots should go through ApplyGameObjectInstanceChangesToPrefab instead;
+				// writing them here corrupts GUIDs via MakeIdGuidsUnique on the wrong prefab.
+				Log.Warning( $"WriteInstanceToPrefab called with a non-outermost prefab root ({go}). Normalising to outermost root." );
+				go = go.OutermostPrefabInstanceRoot;
+			}
 
-			WriteGameObjectToPrefab( go, prefabSource, skipDiskWrite );
+			WriteGameObjectToPrefab( go, go.PrefabInstanceSource, skipDiskWrite );
 		}
 
 		private static (PrefabFile, Dictionary<Guid, Guid>) WriteGameObjectToPrefab( GameObject go, string saveLocation, bool skipDiskWrite = false )

@@ -949,6 +949,96 @@ public partial class Instances
 		Assert.IsTrue( baseInstance.PrefabInstance.InstanceToPrefabLookup.ContainsKey( nestedOriginalId ) );
 	}
 
+	/// <summary>
+	/// Regression: Selecting a nested prefab child in the scene tree and clicking "Apply to Prefab"
+	/// triggered MakeIdGuidsUnique on the outer prefab JSON, randomising all GUIDs.
+	/// Minimal repro: two-level nesting, one inner prefab inside one outer prefab.
+	/// </summary>
+	[TestMethod]
+	public void WriteInstanceToPrefab_CalledOnNestedRoot_DoesNotRandomiseOuterPrefabGuids()
+	{
+		using var innerPrefab = Sandbox.SceneTests.Helpers.RegisterPrefabFromJson( "__nestedPrefab.prefab", _basicPrefabSource );
+		using var outerPrefab = Sandbox.SceneTests.Helpers.RegisterPrefabFromJson( "__outerPrefab.prefab", _outerPrefabWithNestedPrefabSource );
+
+		var outerPrefabFile = ResourceLibrary.Get<PrefabFile>( "__outerPrefab.prefab" );
+		var outerPrefabScene = SceneUtility.GetPrefabScene( outerPrefabFile );
+
+		var originalRootGuid = outerPrefabFile.RootObject["__guid"]!.GetValue<Guid>();
+
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var outerInstance = outerPrefabScene.Clone( Vector3.Zero );
+		Assert.IsTrue( outerInstance.IsOutermostPrefabInstanceRoot );
+		Assert.AreEqual( 1, outerInstance.Children.Count );
+
+		// The nested child is what the user right-clicks in the scene tree
+		var nestedRoot = outerInstance.Children[0];
+		Assert.IsTrue( nestedRoot.IsNestedPrefabInstanceRoot );
+		Assert.IsFalse( nestedRoot.IsOutermostPrefabInstanceRoot );
+
+		var outerInstanceGuid = outerInstance.Id;
+
+		// Simulates right-click → "Apply to Prefab" being called with the nested root
+		EditorUtility.Prefabs.WriteInstanceToPrefab( nestedRoot, true );
+
+		Assert.AreEqual( originalRootGuid, outerPrefabFile.RootObject["__guid"]!.GetValue<Guid>(),
+			"Outer prefab GUIDs must not be replaced when writing a nested prefab root" );
+		Assert.AreEqual( outerInstanceGuid, outerInstance.Id,
+			"Outer instance GUID must not be randomised" );
+	}
+
+	/// <summary>
+	/// Regression: WriteInstanceToPrefab called with a nested prefab root (IsPrefabInstanceRoot=true
+	/// but IsOutermostPrefabInstanceRoot=false) used to compute isWritingBackToExistingInstance=false,
+	/// which triggered MakeIdGuidsUnique on the outer prefab JSON and cascaded to randomise every GUID
+	/// in both the prefab file and all scene instances via ValidatePrefabToInstanceIdLookup.
+	/// </summary>
+	[TestMethod]
+	public void WriteInstanceToPrefab_WithNestedPrefabRoot_DoesNotRandomiseGuids()
+	{
+		// 1. Register all three levels of nested prefab
+		using var nnPrefab = Sandbox.SceneTests.Helpers.RegisterPrefabFromJson( "__nested_nested.prefab", _nestedNestedPrefabSource );
+		using var nPrefab = Sandbox.SceneTests.Helpers.RegisterPrefabFromJson( "__nested.prefab", _nestedPrefabSource );
+		using var bPrefab = Sandbox.SceneTests.Helpers.RegisterPrefabFromJson( "__base.prefab", _basePrefabSource );
+
+		var basePrefabFile = ResourceLibrary.Get<PrefabFile>( "__base.prefab" );
+		var basePrefabScene = SceneUtility.GetPrefabScene( basePrefabFile );
+
+		// Record the outer prefab's root GUID before any writes
+		var originalOuterPrefabRootGuid = basePrefabFile.RootObject["__guid"]!.GetValue<Guid>();
+
+		// 2. Spawn a scene instance of the base (outer) prefab
+		var scene = new Scene();
+		using var sceneScope = scene.Push();
+
+		var outerInstance = basePrefabScene.Clone( Vector3.Zero );
+		Assert.IsTrue( outerInstance.IsOutermostPrefabInstanceRoot );
+		Assert.AreEqual( 1, outerInstance.Children.Count, "Outer instance should have one nested child" );
+
+		var innerInstance = outerInstance.Children[0];
+		Assert.IsTrue( innerInstance.IsNestedPrefabInstanceRoot, "Child should be a nested prefab root" );
+		Assert.IsFalse( innerInstance.IsOutermostPrefabInstanceRoot, "Child must NOT be the outermost root" );
+
+		// Record the outer instance's GUID — this must survive the write
+		var outerInstanceGuid = outerInstance.Id;
+
+		// 3. Call WriteInstanceToPrefab with the NESTED root (reproduction case for the bug).
+		//    Before the fix this silently ran MakeIdGuidsUnique on the outer prefab JSON,
+		//    replacing every __guid, then wrote a fresh file that made ValidatePrefabToInstanceIdLookup
+		//    assign Guid.NewGuid() to every mapping, changing the GUID of outerInstance.
+		EditorUtility.Prefabs.WriteInstanceToPrefab( innerInstance, true );
+
+		// 4. The outer prefab JSON root GUID must be unchanged — MakeIdGuidsUnique must NOT have run
+		var afterOuterPrefabRootGuid = basePrefabFile.RootObject["__guid"]!.GetValue<Guid>();
+		Assert.AreEqual( originalOuterPrefabRootGuid, afterOuterPrefabRootGuid,
+			"WriteInstanceToPrefab must not replace prefab GUIDs when called with a nested prefab root" );
+
+		// 5. The outer scene instance GUID must also be unchanged
+		Assert.AreEqual( outerInstanceGuid, outerInstance.Id,
+			"Scene instance GUID must not be randomised after writing a nested prefab root" );
+	}
+
 	// Innermost prefab definition
 	static readonly string _nestedNestedPrefabSource = """"
 	{
