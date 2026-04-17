@@ -7,8 +7,6 @@ ConsoleRow
     flex-shrink: 0;
     flex-grow: 0;
     height: 20px;
-    min-height: 20px;
-    max-height: 20px;
     width: 100%;
     cursor: pointer;
     align-items: center;
@@ -20,9 +18,7 @@ ConsoleRow
 
     .time
     {
-        width: 88px;
-        min-width: 88px;
-        max-width: 88px;
+        width: 68px;
         justify-content: center;
         margin-right: 5px;
         background-color: rgba( $default-700, 0.45 );

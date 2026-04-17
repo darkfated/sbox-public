@@ -14,9 +14,7 @@ ConsoleInput
 	flex-grow: 1;
 	flex-basis: 0;
 	min-width: 180px;
-	min-height: 30px;
 	height: 30px;
-	max-height: 30px;
 	padding: 0 10px;
 	align-items: center;
 	justify-content: flex-start;
@@ -51,8 +49,6 @@ ConsoleInput
 	right: 0;
 	top: calc( -52px - 12px );
 	height: 52px;
-	min-height: 52px;
-	max-height: 52px;
 	padding: 8px 14px;
 	border-radius: $rounding-small;
 	border: 1px solid rgba( $default-border, 0.75 );
@@ -187,8 +183,6 @@ ConsoleInput
 	right: 0;
 	top: calc( -240px - 12px );
 	height: 240px;
-	max-height: 240px;
-	min-height: 240px;
 	flex-direction: column;
 	overflow-y: scroll;
 	overflow-x: hidden;

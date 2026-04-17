@@ -6,7 +6,7 @@
 		var hostStats = Networking.HostStats;
 	}
 	
-	<div class="stat-title">Host Stats</div>
+	<title class="stat-title">Host Stats</title>
 	
 	<StatValue Value="@hostStats.Fps.ToString()" Title="FPS"></StatValue>
 	<StatValue Value="@( (hostStats.InBytesPerSecond / 1024f).ToString( "0.00" ) )" Title="KB In Per Second"></StatValue>
