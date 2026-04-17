@@ -1,4 +1,4 @@
-using Sandbox.UI.Construct;
+﻿using Sandbox.UI.Construct;
 
 namespace Sandbox.UI.Dev;
 
@@ -19,14 +19,6 @@ public class ExceptionNotification : Panel
 
 	public ExceptionNotification()
 	{
-		AddClass( "exception-notification" );
-		Style.Position = PositionMode.Absolute;
-		Style.Top = 16;
-		Style.Right = 16;
-		Style.Left = null;
-		Style.Bottom = null;
-		Style.Dirty();
-
 		var content = Add.Panel( "content" );
 		var header = content.Add.Panel( "header" );
 
