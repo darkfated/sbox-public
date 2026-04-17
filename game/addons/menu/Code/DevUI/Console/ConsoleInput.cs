@@ -18,7 +18,6 @@ public class ConsoleInput : TextEntry
 
 	public ConsoleInput()
 	{
-		AddClass( "console-textentry" );
 		suggestions = new SuggestionPopup( this );
 		commandPanel = new CommandPanel( this );
 	}
