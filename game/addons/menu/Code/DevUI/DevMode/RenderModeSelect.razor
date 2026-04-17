@@ -29,6 +29,9 @@
     static readonly (SceneCameraDebugMode value, DisplayInfo info)[] DebugModes
         = DisplayInfo.ForEnumValues<SceneCameraDebugMode>();
 
+    [Parameter]
+    public Action<bool> SetRenderModePickerOpen { get; set; }
+
     SceneCameraDebugMode _selectedMode;
     bool _menuOpen;
 
@@ -38,7 +41,8 @@
     DisplayInfo GetDisplayInfo()
     {
         foreach ( var (value, info) in DebugModes )
-            if ( value == _selectedMode ) return info;
+            if ( value == _selectedMode )
+                return info;
 
         return default;
     }
@@ -47,7 +51,6 @@
     {
         _selectedMode = mode;
         ConsoleSystem.Run( "mat_toolsvis", mode.ToString() );
-
         StateHasChanged();
     }
 
@@ -55,7 +58,7 @@
     {
         Sound.Play( "ui.button.press" );
         _menuOpen = !_menuOpen;
-        DeveloperMode.Current?.SetRenderModePickerOpen( _menuOpen );
+        SetRenderModePickerOpen?.Invoke( _menuOpen );
         StateHasChanged();
     }
 
@@ -64,7 +67,7 @@
         Sound.Play( "ui.button.press" );
         SetMode( mode );
         _menuOpen = false;
-        DeveloperMode.Current?.SetRenderModePickerOpen( false );
+        SetRenderModePickerOpen?.Invoke( false );
         StateHasChanged();
     }
 
@@ -94,7 +97,7 @@
         if ( _menuOpen && !DeveloperMode.Open )
         {
             _menuOpen = false;
-            DeveloperMode.Current?.SetRenderModePickerOpen( false );
+            SetRenderModePickerOpen?.Invoke( false );
             StateHasChanged();
         }
 
