@@ -3,8 +3,8 @@
 
 console
 {
-	font-family: Roboto Mono;
-	font-size: 10px;
+	font-family: $font-default;
+	font-size: 12px;
 	font-weight: normal;
 	position: relative;
 	flex-direction: column;
@@ -34,7 +34,6 @@ console
 	{
 		position: relative;
 		z-index: 30;
-		font-family: $font-default;
 		align-items: center;
 		gap: 8px;
 		padding: 4px;
@@ -42,7 +41,6 @@ console
 
 		Button
 		{
-			font-family: $font-default;
 			background-color: rgba( $default-500, 0.08 );
 			color: $default-200;
 			border: 1px solid transparent;

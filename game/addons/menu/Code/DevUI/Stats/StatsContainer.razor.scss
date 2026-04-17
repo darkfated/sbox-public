@@ -15,7 +15,7 @@ StatsContainer
     flex-direction: column;
     padding: 16px;
     font-family: $font-default;
-    font-size: 12px;
+    font-size: 14px;
     width: 100%;
     outline: 1px solid $default-border;
     background-color: rgba( $default-900, 0.85 );
@@ -30,12 +30,5 @@ StatsContainer
         margin-bottom: 6px;
         letter-spacing: 1px;
         text-transform: uppercase;
-
-        > label
-        {
-            color: $primary-blue;
-            font-weight: 700;
-            font-size: 12px;
-        }
     }
 }

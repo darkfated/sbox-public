@@ -2,6 +2,8 @@
 
 ConsoleRow
 {
+    font-family: $font-default;
+    font-size: 12px;
     flex-shrink: 0;
     flex-grow: 0;
     height: 20px;
@@ -29,7 +31,6 @@ ConsoleRow
         flex-shrink: 0;
         flex-grow: 0;
         white-space: nowrap;
-        font-family: Roboto Mono;
 
         > label
         {

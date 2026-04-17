@@ -6,7 +6,7 @@ consoleoverlay
 	left: 16px;
 	right: 16px;
 	top: 12px;
-	font-family: Roboto Mono;
+	font-family: $font-default;
 	flex-direction: column;
 	pointer-events: none;
 	z-index: 60;

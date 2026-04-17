@@ -19,7 +19,8 @@ console .logeventpanel
     z-index: 20;
     overflow: hidden;
     height: 210px;
-    font-size: 10px;
+    font-family: $font-default;
+    font-size: 12px;
     font-weight: 600;
     pointer-events: auto;
 }
@@ -72,7 +73,6 @@ console .logeventpanel .message .stack > *
 
 console .logeventpanel .message .stack > .details
 {
-    font-size: 12px;
     line-height: 16px;
     color: $default-text-light;
     white-space: pre;
