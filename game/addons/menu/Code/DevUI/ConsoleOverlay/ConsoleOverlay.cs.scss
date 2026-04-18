@@ -1,4 +1,4 @@
-@import '/styles/_Theme.scss';
+@import '/styles/_theme.scss';
 
 consoleoverlay
 {
@@ -6,36 +6,31 @@ consoleoverlay
 	left: 16px;
 	right: 16px;
 	top: 12px;
-	font-family: $font-default;
-	flex-direction: column;
-	pointer-events: none;
 	z-index: 60;
+	flex-direction: column;
+	font-family: $font-default;
+	pointer-events: none;
 
 	.output
 	{
 		flex-direction: column;
 		align-items: flex-start;
-		overflow: hidden;
 		flex-grow: 1;
-		gap: 0;
+		overflow: hidden;
 
 		ConsoleEntry
 		{
 			flex-shrink: 0;
-			flex-direction: row;
-			align-items: center;
 			width: 100%;
 			max-width: 980px;
 			min-height: 24px;
-			padding: 0;
-			border-radius: 0;
-			border: 1px solid rgba( $default-border, 0.75 );
+			flex-direction: row;
+			align-items: center;
+			color: $default-200;
 			background-color: rgba( $default-950, 0.84 );
-			box-shadow: 0 4px 14px rgba( black, 0.28 );
-			color: #919aab;
+			border: 1px solid rgba( $default-border, 0.75 );
 			pointer-events: auto;
 			overflow: hidden;
-			gap: 0;
 
 			label
 			{
@@ -43,19 +38,14 @@ consoleoverlay
 				font-size: 10px;
 				font-weight: 600;
 				line-height: 14px;
-				text-shadow: none;
-				background-color: transparent;
 			}
 
 			.time
 			{
-				width: 52px;
-				min-width: 52px;
-				max-width: 52px;
+				width: 68px;
 				margin-left: 4px;
 				align-items: center;
 				justify-content: center;
-				padding: 0;
 				color: $default-200;
 				background-color: rgba( $default-800, 0.46 );
 				text-align: center;
@@ -63,48 +53,38 @@ consoleoverlay
 				> label
 				{
 					width: 100%;
-					text-align: center;
-					color: $default-200;
 					padding: 3px 0;
 				}
 			}
 
-			.message > label
-			{
-				color: #919aab;
-				padding-left: 8px;
-				padding-right: 10px;
-			}
-
 			.message
 			{
-				color: #919aab;
 				flex-grow: 1;
 				min-width: 0;
 				white-space: nowrap;
+				color: $default-200;
+
+				> label
+				{
+					padding-left: 8px;
+					padding-right: 10px;
+				}
 			}
 
-			&.Trace
-			{
-				opacity: 0.8;
-			}
+			&.Trace { opacity: 0.8; }
 
-			&.Warn
+			&.Warn,
+			&.Warn .message,
+			&.Warn .message > label
 			{
 				color: #ffd75d;
-
-				.message,
-				.message > label
-				{
-					color: #ffd75d;
-				}
 			}
 
 			&.Error
 			{
-				color: #ff6f7c;
 				background-color: rgba( #ff5a6a, 0.11 );
 
+				&,
 				.message,
 				.message > label
 				{
@@ -112,19 +92,16 @@ consoleoverlay
 				}
 			}
 
-			&.in
+			&.in .message,
+			&.in .message > label
 			{
-				.message,
-				.message > label
-				{
-					color: $primary-blue;
-				}
+				color: $primary-blue;
 			}
 
 			&:hover
 			{
 				background-color: rgba( $default-900, 0.95 );
-				border-color: rgba( $default-border, 0.95 );
+				border-color: $default-border;
 			}
 		}
 	}

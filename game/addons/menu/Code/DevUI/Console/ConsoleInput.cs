@@ -16,6 +16,8 @@ public class ConsoleInput : TextEntry
 	readonly SuggestionPopup suggestions;
 	readonly CommandPanel commandPanel;
 
+	RealTimeUntil? hideAt;
+
 	public ConsoleInput()
 	{
 		suggestions = new SuggestionPopup( this );
@@ -82,14 +84,30 @@ public class ConsoleInput : TextEntry
 	protected override void OnFocus( PanelEvent e )
 	{
 		base.OnFocus( e );
+		hideAt = null;
 		UpdateInteractivePanels();
 	}
 
 	protected override void OnBlur( PanelEvent e )
 	{
 		base.OnBlur( e );
-		suggestions.Destroy();
-		commandPanel.Destroy();
+		hideAt = 0.15f;
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( hideAt.HasValue && hideAt.Value )
+		{
+			hideAt = null;
+
+			if ( HasFocus || suggestions.HasFocusInside || commandPanel.HasFocusInside )
+				return;
+
+			suggestions.Destroy();
+			commandPanel.Destroy();
+		}
 	}
 
 	public void FocusInput() => Focus();
@@ -249,7 +267,6 @@ public class ConsoleInput : TextEntry
 		}
 
 		var argument = trimmed[(separator + 1)..];
-
 		return new ParsedInput
 		{
 			Command = trimmed[..separator],
@@ -267,6 +284,14 @@ public class ConsoleInput : TextEntry
 		return separator < 0 ? trimmed : trimmed[..separator];
 	}
 
+	Panel CreateFloatingSibling( string cssClass )
+	{
+		var host = Parent ?? this;
+		var p = host.AddChild<Panel>();
+		p.AddClass( cssClass );
+		return p;
+	}
+
 	private class SuggestionPopup
 	{
 		readonly ConsoleInput owner;
@@ -278,6 +303,7 @@ public class ConsoleInput : TextEntry
 
 		public bool HasItems => PanelRef.IsValid() && suggestionItems.Count > 0;
 		public bool IsValid => PanelRef.IsValid() && !PanelRef.IsDeleting;
+		public bool HasFocusInside => PanelRef.IsValid() && PanelRef.HasHovered;
 
 		public SuggestionPopup( ConsoleInput owner )
 		{
@@ -310,9 +336,9 @@ public class ConsoleInput : TextEntry
 
 			if ( !IsValid )
 			{
-				PanelRef = owner.Add.Panel( "console-suggestion-menu" );
-				PanelRef.SetClass( "hidden", true );
+				PanelRef = owner.CreateFloatingSibling( "console-suggestion-menu" );
 			}
+
 			PanelRef.SetClass( "hidden", true );
 			PanelRef.ScrollOffset = 0;
 			PanelRef.DeleteChildren();
@@ -332,6 +358,7 @@ public class ConsoleInput : TextEntry
 
 				item.Command = ExtractFirstToken( item.Value );
 				suggestionItems.Add( item );
+
 				var rawCurrentValue = string.IsNullOrWhiteSpace( item.Command )
 					? null
 					: ConsoleSystem.GetValue( item.Command );
@@ -359,6 +386,7 @@ public class ConsoleInput : TextEntry
 
 			PanelRef.SetClass( "hidden", false );
 			UpdateSuggestionClasses( updateSelection: true, updateTypedMatch: true );
+			PanelRef.StateHasChanged();
 		}
 
 		public void Destroy()
@@ -366,9 +394,9 @@ public class ConsoleInput : TextEntry
 			preserveSuggestionListOnce = false;
 			if ( PanelRef.IsValid() )
 			{
-				PanelRef.SetClass( "hidden", true );
-				PanelRef.DeleteChildren();
+				PanelRef.Delete();
 			}
+			PanelRef = null;
 			suggestionItems.Clear();
 			suggestionRows.Clear();
 			selectedSuggestionIndex = -1;
@@ -414,6 +442,7 @@ public class ConsoleInput : TextEntry
 			var typedCommand = updateTypedMatch ? ExtractFirstToken( owner.Text ) : string.Empty;
 			var hasTypedCommand = !string.IsNullOrWhiteSpace( typedCommand );
 			var count = Math.Min( suggestionRows.Count, suggestionItems.Count );
+
 			for ( var i = 0; i < count; i++ )
 			{
 				var row = suggestionRows[i];
@@ -463,6 +492,8 @@ public class ConsoleInput : TextEntry
 		Label smartArgCommandLabel;
 		Panel smartArgControls;
 
+		public bool HasFocusInside => PanelRef.IsValid() && PanelRef.HasHovered;
+
 		public CommandPanel( ConsoleInput owner )
 		{
 			this.owner = owner;
@@ -485,11 +516,13 @@ public class ConsoleInput : TextEntry
 			if ( model.IsBoolean )
 			{
 				BuildBooleanControls( model );
-				return;
+			}
+			else if ( model.IsNumeric )
+			{
+				BuildNumericControls( model );
 			}
 
-			if ( model.IsNumeric )
-				BuildNumericControls( model );
+			PanelRef.StateHasChanged();
 		}
 
 		void EnsureCommandPanel()
@@ -497,9 +530,10 @@ public class ConsoleInput : TextEntry
 			if ( PanelRef.IsValid() && !PanelRef.IsDeleting )
 				return;
 
-			PanelRef = owner.Add.Panel( "command-panel" );
+			PanelRef = owner.CreateFloatingSibling( "command-panel" );
 			PanelRef.SetClass( "hidden", true );
 			PanelRef.AddEventListener( "onmousedown", ( PanelEvent _ ) => owner.Focus() );
+
 			var header = PanelRef.Add.Panel( "header" );
 			smartArgCommandLabel = header.AddChild( new Label( string.Empty, "command" ) );
 
@@ -511,7 +545,10 @@ public class ConsoleInput : TextEntry
 			if ( !PanelRef.IsValid() )
 				return;
 
-			PanelRef.SetClass( "hidden", true );
+			PanelRef.Delete();
+			PanelRef = null;
+			smartArgCommandLabel = null;
+			smartArgControls = null;
 		}
 
 		void BuildBooleanControls( SmartArgumentModel model )
@@ -537,12 +574,14 @@ public class ConsoleInput : TextEntry
 
 			AddSmartArgButton( $"-{largeStepLabel}", () => ShiftNumericArgument( effectiveModel, -largeStep ) );
 			AddSmartArgButton( $"-{smallStepLabel}", () => ShiftNumericArgument( effectiveModel, -smallStep ) );
+
 			var currentButton = AddSmartArgButton( "current", () =>
 			{
 				var currentValue = ConsoleSystem.GetValue( effectiveModel.Command, effectiveModel.CurrentValue ) ?? effectiveModel.CurrentValue;
 				owner.SetInputArgumentValue( effectiveModel.Command, currentValue );
 			} );
 			currentButton.AddClass( "secondary" );
+
 			AddSmartArgButton( $"+{smallStepLabel}", () => ShiftNumericArgument( effectiveModel, smallStep ) );
 			AddSmartArgButton( $"+{largeStepLabel}", () => ShiftNumericArgument( effectiveModel, largeStep ) );
 		}
@@ -582,6 +621,7 @@ public class ConsoleInput : TextEntry
 			var currentValue = ConsoleSystem.GetValue( parsed.Command, null );
 			if ( string.IsNullOrWhiteSpace( currentValue ) )
 				return default;
+
 			var hasTypedArgument = !string.IsNullOrWhiteSpace( parsed.ArgumentText );
 
 			var model = new SmartArgumentModel

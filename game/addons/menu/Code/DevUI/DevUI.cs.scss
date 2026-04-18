@@ -1,22 +1,18 @@
-
-@import '/styles/base.scss';
-@import '/styles/form.scss';
-@import '/styles/_Theme.scss';
+@import '/styles/_theme.scss';
 
 devlayer
 {
 	width: 100%;
-	z-index: 10000;
 	height: 100%;
+	z-index: 10000;
 	pointer-events: none;
 	font-family: $font-default;
+	color: $default-text;
 
 	&.developermode
 	{
 		pointer-events: all;
 
-		// Hide the console overlay when the
-		// real console is opened
 		consoleoverlay
 		{
 			display: none;
@@ -26,16 +22,14 @@ devlayer
 	.popup-panel
 	{
 		pointer-events: all;
-		font-family: $font-default;
 		background-color: $default-900;
+		border: 1px solid $default-border;
 		border-radius: $rounding-default;
-		outline: 1px solid $default-border;
 		color: $default-text;
 
 		.button
 		{
-			font-size: 12px;
+			font-size: $text-small;
 		}
 	}
 }
-

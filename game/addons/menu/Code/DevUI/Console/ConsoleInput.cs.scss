@@ -1,24 +1,21 @@
-@import '/styles/_Theme.scss';
+@import '/styles/_theme.scss';
 
 ConsoleInput
 {
 	position: relative;
-	z-index: 100;
-	background-color: rgba( $default-800, 0.85 );
-	border: 1px solid transparent;
-	border-radius: $rounding-small;
-	cursor: text;
-	flex-shrink: 0;
-	color: $default-text;
-	overflow: visible;
 	flex-grow: 1;
-	flex-basis: 0;
 	min-width: 180px;
 	height: 30px;
 	padding: 0 10px;
 	align-items: center;
 	justify-content: flex-start;
 	font-family: $font-default;
+	color: $default-text;
+	background-color: rgba( $default-800, 0.85 );
+	border: 1px solid transparent;
+	border-radius: $rounding-small;
+	cursor: text;
+	overflow: visible;
 
 	.prefix-label,
 	.suffix-label
@@ -28,15 +25,14 @@ ConsoleInput
 
 	.content-label
 	{
-		position: relative;
 		flex-grow: 1;
-		flex-shrink: 1;
 		min-width: 0;
 		color: $default-text;
-		cursor: text;
 	}
 
-	&:active, &:focus, &:hover
+	&:hover,
+	&:focus,
+	&:active
 	{
 		border-color: rgba( $primary-blue, 0.45 );
 	}
@@ -47,117 +43,91 @@ ConsoleInput
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: calc( -52px - 12px );
+	bottom: calc( 100% + 8px );
 	height: 52px;
 	padding: 8px 14px;
-	border-radius: $rounding-small;
-	border: 1px solid rgba( $default-border, 0.75 );
-	background-color: rgba( $default-900, 1 );
-	z-index: 10001;
-	gap: 0;
-	cursor: default;
 	flex-direction: row;
 	align-items: center;
-	justify-content: center;
-	opacity: 1;
-	transform: translateY( 0px );
-	transition: opacity 0.14s ease, transform 0.14s ease;
-
-	> .header,
-	> .header > .command
-	{
-		cursor: default;
-	}
+	gap: 8px;
+	color: $default-text;
+	background-color: $default-900;
+	border: 1px solid $default-border;
+	border-radius: $rounding-small;
+	z-index: 50;
+	transition: opacity 150ms $easing, transform 150ms $easing;
 
 	> .header
 	{
-		width: calc( 100% - 304px );
+		flex-grow: 1;
 		min-width: 0;
-		flex-direction: row;
 		align-items: center;
-		justify-content: flex-start;
-		height: 100%;
-		margin-right: auto;
 
 		> .command
 		{
-			font-size: 15px;
-			font-weight: 800;
-			color: #ffffff;
+			font-family: $font-heading;
+			font-size: $text-medium;
+			font-weight: 700;
+			color: $default-text;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
-			text-align: left;
-			max-width: 100%;
 		}
 	}
 
 	> .controls
 	{
-		position: absolute;
-		right: 14px;
-		top: 50%;
-		transform: translateY( -50% );
+		flex-shrink: 0;
 		align-items: center;
 		justify-content: flex-end;
 		gap: 6px;
-		min-height: 24px;
-		max-width: 276px;
 
 		> .arg-btn
 		{
 			min-width: 48px;
 			height: 24px;
 			padding: 0 9px;
-			border-radius: $rounding-small;
-			border: 1px solid rgba( $default-border, 0.6 );
-			background-color: rgba( $default-700, 0.35 );
-			color: #ffffff;
+			align-items: center;
+			justify-content: center;
 			font-size: 11px;
 			font-weight: 700;
+			color: $default-text;
+			background-color: rgba( $default-700, 0.35 );
+			border: 1px solid rgba( $default-border, 0.6 );
+			border-radius: $rounding-small;
 			cursor: pointer;
-			transition: background-color 0.08s ease-out, border-color 0.08s ease-out, color 0.08s ease-out;
+			transition: all 150ms $easing;
 
 			&:hover
 			{
 				background-color: rgba( $default-600, 0.42 );
+				border-color: rgba( $primary-blue, 0.45 );
 			}
 
+			&.active,
 			&:active
 			{
-				background-color: rgba( $primary-blue, 0.34 );
-				border-color: rgba( $primary-blue, 0.72 );
-				color: #ffffff;
+				color: $default-text;
+				background-color: rgba( $primary-blue, 0.3 );
+				border-color: rgba( $primary-blue, 0.64 );
 			}
 
 			&.secondary
 			{
-				color: rgba( $default-200, 0.92 );
-				background-color: rgba( $default-600, 0.26 );
 				min-width: 74px;
-
-				&:active
-				{
-					background-color: rgba( $primary-blue, 0.3 );
-					border-color: rgba( $primary-blue, 0.68 );
-					color: #ffffff;
-				}
-			}
-
-			&.active
-			{
-				background-color: rgba( $primary-blue, 0.3 );
-				border-color: rgba( $primary-blue, 0.64 );
+				color: $default-200;
+				background-color: rgba( $default-600, 0.26 );
 			}
 		}
 	}
 
-	&:not(.has-actions)
+	&:not(.has-actions) > .controls
 	{
-		> .controls
-		{
-			display: none;
-		}
+		display: none;
+	}
+
+	&.is-bool > .controls > .arg-btn
+	{
+		min-width: 56px;
 	}
 
 	&.hidden
@@ -166,14 +136,6 @@ ConsoleInput
 		transform: translateY( 4px );
 		pointer-events: none;
 	}
-
-	&.is-bool
-	{
-		> .controls > .arg-btn
-		{
-			min-width: 56px;
-		}
-	}
 }
 
 .console-suggestion-menu
@@ -181,20 +143,18 @@ ConsoleInput
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: calc( -240px - 12px );
-	height: 240px;
+	bottom: calc( 100% + 8px );
+	max-height: 240px;
 	flex-direction: column;
+	gap: 4px;
+	padding: 6px;
+	background-color: $default-900;
+	border: 1px solid $default-border;
+	border-radius: $rounding-default;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	gap: 4px;
-	border-radius: $rounding-default;
-	background-color: rgba( $default-900, 1 );
-	border: 1px solid rgba( $default-border, 0.85 );
-	padding: 6px;
-	z-index: 10000;
-	opacity: 1;
-	transform: translateY( 0px );
-	transition: opacity 0.14s ease, transform 0.14s ease;
+	z-index: 50;
+	transition: opacity 150ms $easing, transform 150ms $easing;
 
 	&.hidden
 	{
@@ -206,69 +166,56 @@ ConsoleInput
 	> .suggestion-item
 	{
 		height: 34px;
-		min-height: 34px;
-		max-height: 34px;
-		cursor: pointer;
+		padding: 6px 8px;
 		flex-direction: row;
 		align-items: center;
 		gap: 10px;
-		justify-content: flex-start;
-		padding: 6px 8px;
-		font-weight: 700;
-		border-radius: $rounding-small;
+		color: $default-text;
 		background-color: rgba( $default-700, 0.2 );
 		border: 1px solid transparent;
-		transition: background-color 0.06s ease-out;
-		color: #ffffff;
+		border-radius: $rounding-small;
+		cursor: pointer;
 		overflow: hidden;
+		transition: all 150ms $easing;
 
 		> label
 		{
-			font-size: 12px;
+			font-size: $text-small;
 			line-height: 16px;
-			padding: 0;
 		}
 
 		> .name
 		{
 			flex-grow: 1;
-			flex-shrink: 1;
 			min-width: 0;
 			white-space: nowrap;
+			font-weight: 700;
 		}
 
 		> .value
 		{
-			flex-grow: 0;
 			flex-shrink: 0;
 			white-space: nowrap;
-			color: rgba( $default-200, 0.8 );
 			text-align: right;
+			color: rgba( $default-200, 0.8 );
 		}
 
 		&:hover
 		{
 			background-color: rgba( $default-600, 0.24 );
+			border-color: rgba( $primary-blue, 0.45 );
 		}
 
 		&.active
 		{
 			background-color: rgba( $default-500, 0.2 );
-			border-color: rgba( $default-border, 0.9 );
+			border-color: $default-border;
 		}
 
 		&.typed-match
 		{
 			background-color: rgba( $primary-blue, 0.22 );
 			border-color: rgba( $primary-blue, 0.62 );
-
-			> .name
-			{
-			}
-			> .value
-			{
-				color: rgba( $default-200, 0.86 );
-			}
 		}
 	}
 }
