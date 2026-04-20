@@ -12,7 +12,7 @@ public class ConsoleInput : TextEntry
 
 	public override void OnButtonEvent( ButtonEvent e )
 	{
-		if ( e.Button == "tab" && ( SuggestionsPanel?.HasItems == true || CanCycleHistory() ) )
+		if ( e.Button == "tab" && (SuggestionsPanel?.HasItems == true || CanCycleHistory()) )
 		{
 			e.StopPropagation = true;
 			return;
@@ -125,7 +125,7 @@ public class ConsoleInput : TextEntry
 
 	bool CanCycleHistory()
 	{
-		return historyCycling || ( string.IsNullOrWhiteSpace( Text ) && commandHistory.Count > 0 );
+		return historyCycling || (string.IsNullOrWhiteSpace( Text ) && commandHistory.Count > 0);
 	}
 
 	void StopHistoryCycling()
@@ -145,7 +145,7 @@ public class ConsoleInput : TextEntry
 			historyIndex = -1;
 		}
 
-		historyIndex = ( historyIndex + direction + commandHistory.Count ) % commandHistory.Count;
+		historyIndex = (historyIndex + direction + commandHistory.Count) % commandHistory.Count;
 		Text = commandHistory[historyIndex];
 		CaretPosition = TextLength;
 		SuggestionsPanel?.Hide();
