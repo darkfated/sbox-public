@@ -8,25 +8,27 @@ ExceptionNotification
 	width: 460px;
 	max-width: 45%;
 	min-width: 340px;
-	max-height: 340px;
-	padding: 10px;
-	background-color: rgba( $default-900, 0.96 );
-	border: 1px solid rgba( #ff6f80, 0.9 );
-	color: $default-text;
-	font-family: $font-default;
-	font-size: 11px;
-	border-radius: $rounding-default;
-	pointer-events: auto;
-	z-index: 100000;
-	transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
-	transform: translateX( 0 );
-	overflow: hidden;
+	max-height: 360px;
+	padding: 12px 14px;
 	flex-direction: column;
+	font-family: $font-default;
+	font-size: 12px;
+	color: $default-text;
+	background-color: rgba( $default-900, 0.96 );
+	border: 1px solid rgba( #ff6f80, 0.85 );
+	border-radius: $rounding-default;
+	box-shadow: 0 8px 28px rgba( black, 0.35 );
+	z-index: 100000;
+	pointer-events: auto;
+	overflow: hidden;
+	transform: translateX( 0 );
+	transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
 }
 
 ExceptionNotification.fresh
 {
 	background-color: rgba( $default-800, 0.98 );
+	border-color: rgba( #ff8b98, 0.92 );
 }
 
 ExceptionNotification.hidden
@@ -40,7 +42,7 @@ ExceptionNotification.hidden
 ExceptionNotification > .content
 {
 	flex-direction: column;
-	gap: 6px;
+	gap: 10px;
 	min-width: 0;
 	width: 100%;
 }
@@ -49,49 +51,54 @@ ExceptionNotification .header
 {
 	flex-direction: row;
 	align-items: center;
-	gap: 8px;
-	min-height: 18px;
-	padding-bottom: 2px;
-	border-bottom: 1px solid rgba( $default-border, 0.45 );
+	gap: 10px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid rgba( $default-border, 0.35 );
 }
 
 ExceptionNotification .symbol
 {
+	flex-shrink: 0;
+	font-size: 18px;
 	color: #ff97a3;
-	font-size: 16px;
 	opacity: 0.95;
 }
 
 ExceptionNotification .title
 {
-	font-size: 13px;
-	font-weight: 700;
-	color: $default-text-light;
-	text-overflow: ellipsis;
+	flex-grow: 1;
+	min-width: 0;
+	font-size: 14px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: $default-text;
 	white-space: nowrap;
 	overflow: hidden;
-	line-height: 16px;
+	text-overflow: ellipsis;
 }
 
 ExceptionNotification .message
 {
+	padding: 2px 0 0 0;
 	font-size: 12px;
 	line-height: 16px;
 	color: rgba( $default-text, 0.95 );
-	white-space: pre;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 ExceptionNotification .trace-container
 {
 	flex-direction: column;
-	max-height: 220px;
+	min-height: 0;
+	max-height: 250px;
+	padding: 8px 10px;
 	overflow-y: scroll;
 	background-color: rgba( $default-950, 0.62 );
 	border: 1px solid rgba( $default-border, 0.7 );
 	border-radius: $rounding-small;
-	padding: 7px 8px;
-	opacity: 1;
-	transform: translateY( 0px );
 	transition: opacity 0.16s ease, transform 0.16s ease, max-height 0.16s ease, margin 0.16s ease, padding 0.16s ease;
 }
 
