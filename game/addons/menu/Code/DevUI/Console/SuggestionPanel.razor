@@ -11,10 +11,7 @@
         @for ( var i = 0; i < Items.Count; i++ )
         {
             var item = Items[i];
-            <row class="@RowClasses( i )">
-                <div class="title">@item.Title</div>
-                <div class="value">@item.Meta</div>
-            </row>
+            <SuggestionRow Entry="@item" Selected="@(i == SelectedIndex)" Input="@Input" />
         }
     </div>
 </root>
@@ -38,12 +35,17 @@
     public bool Visible { get; private set; }
     int SelectedIndex = -1;
     public string Hint { get; private set; } = "Start typing";
+    RealTimeUntil hideClearDelay;
+    bool clearAfterHide;
 
     string classes => $"suggestionpanel {(Visible ? "visible" : "hidden")}";
     public bool HasItems => Visible && Items.Count > 0;
 
     public void Update( string text, Func<string, object[]> provider )
     {
+        clearAfterHide = false;
+        hideClearDelay = 0;
+
         if ( provider == null )
         {
             Hide();
@@ -93,9 +95,26 @@
     {
         Visible = false;
         SelectedIndex = -1;
-        items.Clear();
+        if ( items.Count > 0 )
+        {
+            clearAfterHide = true;
+            hideClearDelay = 0.12f;
+        }
         SetClass( "hidden", true );
         StateHasChanged();
+    }
+
+    public override void Tick()
+    {
+        base.Tick();
+
+        if ( clearAfterHide && hideClearDelay <= 0 )
+        {
+            items.Clear();
+            Hint = "Start typing";
+            clearAfterHide = false;
+            StateHasChanged();
+        }
     }
 
     public void MoveSelection( int direction )
@@ -117,16 +136,6 @@
             return string.Empty;
 
         return Items[SelectedIndex].Value;
-    }
-
-    string RowClasses( int index )
-    {
-        var classes = "suggestion-row";
-
-        if ( index == SelectedIndex )
-            classes += " selected";
-
-        return classes;
     }
 
     SuggestionEntry ConvertOption( object option )

@@ -1,0 +1,23 @@
+@namespace Sandbox.UI.Dev
+@inherits Panel
+
+<root class="@classes">
+	<div class="title">@Entry.Title</div>
+	<div class="value">@Entry.Meta</div>
+</root>
+
+@code
+{
+	[Parameter] public SuggestionPanel.SuggestionEntry Entry { get; set; }
+	[Parameter] public bool Selected { get; set; }
+	[Parameter] public ConsoleInput Input { get; set; }
+
+	public string classes => $"suggestion-row clicky {(Selected ? "selected" : "")}".Trim();
+
+	protected override void OnMouseDown( MousePanelEvent e )
+	{
+		base.OnMouseDown( e );
+		Input?.ApplySuggestion( Entry.Value );
+		e.StopPropagation();
+	}
+}

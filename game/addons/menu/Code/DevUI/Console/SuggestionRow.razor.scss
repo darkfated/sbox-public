@@ -1,0 +1,62 @@
+@import '/styles/_theme.scss';
+
+SuggestionRow
+{
+	width: 100%;
+	align-self: stretch;
+	min-height: 30px;
+	padding: 6px 10px;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	justify-content: flex-start;
+	text-align: left;
+	color: $default-text;
+	background-color: rgba( $default-700, 0.22 );
+	border: 1px solid rgba( $default-border, 0.18 );
+	border-radius: $rounding-small;
+	cursor: pointer;
+	pointer-events: auto;
+	overflow: hidden;
+	font-family: $font-default;
+	transition: background-color 60ms $easing, border-color 60ms $easing, color 60ms $easing;
+}
+
+SuggestionRow:hover
+{
+	background-color: rgba( $default-700, 0.34 );
+}
+
+SuggestionRow.selected
+{
+	background-color: rgba( $primary-blue, 0.22 );
+	border-color: rgba( $primary-blue, 0.82 );
+}
+
+SuggestionRow .title
+{
+	flex-grow: 0;
+	flex-shrink: 1;
+	min-width: 0;
+	font-size: 12px;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: $default-text;
+}
+
+SuggestionRow .value
+{
+	flex-shrink: 0;
+	margin-left: 4px;
+	min-width: 0;
+	padding: 0;
+	font-size: 12px;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: left;
+	color: #3273eb;
+}
