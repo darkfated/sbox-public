@@ -29,7 +29,6 @@ consoleoverlay .output ConsoleEntry
 	padding: 1px 6px 1px 0;
 	align-items: center;
 	gap: 8px;
-	color: #919aab;
 	background-color: rgba( $default-950, 0.84 );
 	border: 1px solid rgba( $default-border, 0.75 );
 	border-radius: 0;
@@ -59,17 +58,10 @@ consoleoverlay .output ConsoleEntry .time
 	font-weight: 700;
 	line-height: 18px;
 	letter-spacing: 0.02em;
-	color: $default-200;
+    color: $default-200;
 	background-color: rgba( $default-800, 0.46 );
 	border: 1px solid rgba( $default-border, 0.55 );
 	border-radius: 0;
-	text-align: center;
-}
-
-consoleoverlay .output ConsoleEntry .time > label
-{
-	padding: 0;
-	color: $default-200;
 	text-align: center;
 }
 
@@ -80,13 +72,7 @@ consoleoverlay .output ConsoleEntry .message
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	color: #919aab;
-}
-
-consoleoverlay .output ConsoleEntry .message > label
-{
-	padding: 0;
-	color: #919aab;
+	color: $default-text;
 }
 
 consoleoverlay .output ConsoleEntry.Trace
@@ -99,37 +85,8 @@ consoleoverlay .output ConsoleEntry.Warn
 	color: #ffd75d;
 }
 
-consoleoverlay .output ConsoleEntry.Warn .message,
-consoleoverlay .output ConsoleEntry.Warn .message > label
-{
-	color: #ffd75d;
-}
-
 consoleoverlay .output ConsoleEntry.Error
 {
 	color: #ff6f7c;
 	background-color: rgba( #ff5a6a, 0.11 );
-}
-
-consoleoverlay .output ConsoleEntry.Error .message,
-consoleoverlay .output ConsoleEntry.Error .message > label
-{
-	color: #ff6f7c;
-}
-
-consoleoverlay .output ConsoleEntry.in
-{
-	color: $primary-blue;
-}
-
-consoleoverlay .output ConsoleEntry.in .message,
-consoleoverlay .output ConsoleEntry.in .message > label
-{
-	color: $primary-blue;
-}
-
-consoleoverlay .output ConsoleEntry:hover
-{
-	background-color: rgba( $default-900, 0.95 );
-	border-color: $default-border;
 }

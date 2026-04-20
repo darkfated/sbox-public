@@ -48,7 +48,6 @@ ConsoleRow .time
 ConsoleRow .time > label
 {
 	text-align: center;
-	color: $default-200;
 }
 
 ConsoleRow .message
@@ -66,30 +65,19 @@ ConsoleRow.Trace
 	opacity: 0.72;
 }
 
-ConsoleRow.Warn
-{
-	color: #ffd75d;
-}
-
 ConsoleRow.Warn .message
 {
-	color: #ffd75d;
+  color: #ffd75d;
 }
 
 ConsoleRow.Error
 {
-	color: #ff6f7c;
 	background-color: rgba( #ff5a6a, 0.08 );
 }
 
 ConsoleRow.Error .message
 {
 	color: #ff6f7c;
-}
-
-ConsoleRow.in
-{
-	color: $primary-blue;
 }
 
 ConsoleRow.in .message
