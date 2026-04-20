@@ -14,124 +14,124 @@ console
 	border: 1px solid $default-border;
 	border-radius: $rounding-large;
 	overflow: visible;
+}
 
-	.console_output
-	{
-		flex-grow: 1;
-		width: 100%;
-		min-height: 0;
-		font-size: 10px;
-		color: $default-200;
-		background-color: $default-900;
-		border-radius: $rounding-small;
-	}
+console .console_output
+{
+	flex-grow: 1;
+	width: 100%;
+	min-height: 0;
+	font-size: 10px;
+	color: $default-200;
+	background-color: $default-900;
+	border-radius: $rounding-small;
+}
 
-	.toolbar
-	{
-		position: relative;
-		z-index: 10;
-		align-items: center;
-		gap: 8px;
-		padding: 4px;
-		width: 100%;
-		overflow: visible;
+console .toolbar
+{
+	position: relative;
+	z-index: 10;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 4px 4px 4px;
+	width: 100%;
+	overflow: visible;
+}
 
-		Button
-		{
-			min-width: 40px;
-			min-height: 32px;
-			padding: 0 14px;
-			gap: 5px;
-			align-items: center;
-			justify-content: center;
-			white-space: nowrap;
-			font-weight: 500;
-			color: $default-200;
-			background-color: rgba( $default-500, 0.08 );
-			border: 1px solid transparent;
-			border-radius: $rounding-small;
-			cursor: pointer;
-			transition: all 150ms $easing;
+console .toolbar Button
+{
+	min-width: 40px;
+	min-height: 30px;
+	padding: 0 12px;
+	align-items: center;
+	justify-content: center;
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 600;
+	color: $default-200;
+	background-color: rgba( $default-500, 0.08 );
+	border: 1px solid transparent;
+	border-radius: $rounding-small;
+	cursor: pointer;
+	transition: background-color 150ms $easing, border-color 150ms $easing, color 150ms $easing;
+}
 
-			&:hover
-			{
-				background-color: rgba( $default-500, 0.16 );
-				border-color: rgba( $primary-blue, 0.45 );
-			}
+console .toolbar Button:hover
+{
+	background-color: rgba( $default-500, 0.16 );
+	border-color: rgba( $primary-blue, 0.45 );
+}
 
-			&.active
-			{
-				color: $default-text;
-				background-color: rgba( $primary-blue, 0.25 );
-				border-color: rgba( $primary-blue, 0.45 );
-			}
-		}
+console .toolbar Button.active
+{
+	color: $default-text;
+	background-color: rgba( $primary-blue, 0.25 );
+	border-color: rgba( $primary-blue, 0.45 );
+}
 
-		Button.scroll-down-btn
-		{
-			min-width: 46px;
-			padding: 0 10px;
-			font-size: $text-medium;
-			background-color: rgba( $primary-blue, 0.25 );
-			border-color: rgba( $primary-blue, 0.45 );
-		}
+console .toolbar Button.scroll-down-btn
+{
+	min-width: 44px;
+	padding: 0 10px;
+	font-size: $text-medium;
+	background-color: rgba( $primary-blue, 0.25 );
+	border-color: rgba( $primary-blue, 0.45 );
+}
 
-		.type
-		{
-			width: 58px;
-			min-height: 32px;
-			align-items: center;
-			justify-content: center;
-			white-space: nowrap;
-			font-weight: 600;
-			color: $default-200;
-			background-color: rgba( $default-700, 0.25 );
+console .toolbar .type
+{
+	width: 58px;
+	min-height: 30px;
+	align-items: center;
+	justify-content: center;
+	white-space: nowrap;
+	font-weight: 600;
+	color: $default-200;
+	background-color: rgba( $default-700, 0.25 );
+}
 
-			&.err
-			{
-				color: #ff6f7c;
-				background-color: rgba( #ff5a6a, 0.14 );
-			}
+console .toolbar .type.err
+{
+	color: #ff6f7c;
+	background-color: rgba( #ff5a6a, 0.14 );
+}
 
-			&.wrn
-			{
-				color: #ffd75d;
-				background-color: rgba( #ffd75d, 0.16 );
-			}
+console .toolbar .type.wrn
+{
+	color: #ffd75d;
+	background-color: rgba( #ffd75d, 0.16 );
+}
 
-			&.disabled
-			{
-				opacity: 0.25;
-			}
-		}
+console .toolbar .type.disabled
+{
+	opacity: 0.25;
+}
 
-		.filter
-		{
-			flex-grow: 0;
-			flex-shrink: 0;
-			min-width: 160px;
-			max-width: 210px;
-			min-height: 30px;
-			padding: 0 10px;
-			color: $default-100;
-			background-color: rgba( $default-800, 0.85 );
-			border: 1px solid transparent;
-			border-radius: $rounding-small;
-			cursor: text;
-			overflow: hidden;
+console .toolbar .filter
+{
+	flex-grow: 0;
+	flex-shrink: 0;
+	min-width: 160px;
+	max-width: 210px;
+	min-height: 30px;
+	padding: 0 10px;
+	color: $default-100;
+	background-color: rgba( $default-800, 0.85 );
+	border: 1px solid transparent;
+	border-radius: $rounding-small;
+	cursor: text;
+	overflow: hidden;
+}
 
-			.prefix-label,
-			.suffix-label
-			{
-				display: none;
-			}
+console .toolbar .filter .prefix-label,
+console .toolbar .filter .suffix-label
+{
+	display: none;
+}
 
-			&:hover,
-			&:focus,
-			&:active
-			{
-				border-color: rgba( $primary-blue, 0.45 );
-			}
-		}
-	}
+console .toolbar .filter:hover,
+console .toolbar .filter:focus,
+console .toolbar .filter:active
+{
+	border-color: rgba( $primary-blue, 0.45 );
 }

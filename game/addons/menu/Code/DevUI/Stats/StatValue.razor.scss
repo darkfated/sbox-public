@@ -2,36 +2,24 @@
 
 StatValue
 {
-    flex-shrink: 0;
-    color: $default-200;
-    gap: 10px;
-    white-space: nowrap;
+	flex-shrink: 0;
+	color: $default-200;
+	gap: 10px;
+	white-space: nowrap;
+}
 
-    name
-    {
-        flex-grow: 1;
-        color: $default-200;
+StatValue name
+{
+	flex-grow: 1;
+	color: $default-200;
+}
 
-        > label,
-        *
-        {
-            color: $default-200;
-        }
-    }
-
-    value
-    {
-        color: $default-text;
-        width: 80px;
-        flex-shrink: 0;
-        justify-content: flex-end;
-        font-weight: 600;
-        font-family: Roboto Mono;
-
-        > label,
-        *
-        {
-            color: $default-text;
-        }
-    }
+StatValue value
+{
+	color: $default-text;
+	width: 80px;
+	flex-shrink: 0;
+	justify-content: flex-end;
+	font-weight: 600;
+	font-family: Roboto Mono;
 }

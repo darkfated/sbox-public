@@ -8,14 +8,14 @@ devlayer
 	pointer-events: none;
 	font-family: $font-default;
 	color: $default-text;
+}
 
-	&.developermode
-	{
-		pointer-events: all;
+devlayer.developermode
+{
+	pointer-events: all;
+}
 
-		consoleoverlay
-		{
-			display: none;
-		}
-	}
+devlayer.developermode consoleoverlay
+{
+	display: none;
 }

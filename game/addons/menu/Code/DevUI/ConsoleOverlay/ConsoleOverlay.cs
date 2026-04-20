@@ -1,4 +1,6 @@
-﻿namespace Sandbox.UI.Dev;
+using System.Linq;
+
+namespace Sandbox.UI.Dev;
 
 public class ConsoleOverlay : Panel
 {
@@ -15,16 +17,14 @@ public class ConsoleOverlay : Panel
 
 	private void OnConsoleMessage( LogEvent e )
 	{
-		if ( ConsoleSystem.GetValue( "consoleoverlay" ) != "True" )
+		if ( !ConsoleOverlayEnabled )
 			return;
 
 		var entry = Output.AddChild<ConsoleEntry>();
 		entry.SetLogEvent( e );
 		entry.DeleteIn( 8 );
 
-		var c = Output.Children.Count();
-
-		for ( int i = 0; i < c - 10; i++ )
+		while ( Output.Children.Count() > 10 )
 		{
 			Output.Children.First().Delete( true );
 		}

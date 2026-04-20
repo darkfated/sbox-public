@@ -79,11 +79,6 @@ console .logeventpanel .message
 	width: 100%;
 }
 
-console .logeventpanel .message > *
-{
-	flex-shrink: 0;
-}
-
 console .logeventpanel .message .text
 {
 	padding: 8px 4px 6px 4px;
@@ -104,17 +99,13 @@ console .logeventpanel .message .stack
 	padding: 0 4px;
 }
 
-console .logeventpanel .message .stack > *
+console .logeventpanel .message .stack > .details
 {
 	flex-shrink: 0;
 	flex-grow: 0;
 	padding: 4px 0;
-}
-
-console .logeventpanel .message .stack > .details
-{
 	line-height: 16px;
 	color: $default-text-light;
-	white-space: pre-wrap;
+	white-space: pre;
 	font-size: 11px;
 }

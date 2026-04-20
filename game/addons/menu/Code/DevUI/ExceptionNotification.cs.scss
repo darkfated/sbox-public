@@ -1,4 +1,4 @@
-@import '/styles/_Theme.scss';
+@import '/styles/_theme.scss';
 
 ExceptionNotification
 {
@@ -22,96 +22,96 @@ ExceptionNotification
 	transform: translateX( 0 );
 	overflow: hidden;
 	flex-direction: column;
+}
 
-	&.fresh
-	{
-		background-color: rgba( $default-800, 0.98 );
-	}
+ExceptionNotification.fresh
+{
+	background-color: rgba( $default-800, 0.98 );
+}
 
-	&.hidden
-	{
-		opacity: 0;
-		transform: translateX( 12px );
-		pointer-events: none;
-		transition: opacity 0.35s linear, transform 0.35s ease;
-	}
+ExceptionNotification.hidden
+{
+	opacity: 0;
+	transform: translateX( 12px );
+	pointer-events: none;
+	transition: opacity 0.35s linear, transform 0.35s ease;
+}
 
-	> .content
-	{
-		flex-direction: column;
-		gap: 6px;
-		min-width: 0;
-		width: 100%;
-	}
+ExceptionNotification > .content
+{
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+	width: 100%;
+}
 
-	.header
-	{
-		flex-direction: row;
-		align-items: center;
-		gap: 8px;
-		min-height: 18px;
-		padding-bottom: 2px;
-		border-bottom: 1px solid rgba( $default-border, 0.45 );
-	}
+ExceptionNotification .header
+{
+	flex-direction: row;
+	align-items: center;
+	gap: 8px;
+	min-height: 18px;
+	padding-bottom: 2px;
+	border-bottom: 1px solid rgba( $default-border, 0.45 );
+}
 
-	.symbol
-	{
-		color: #ff97a3;
-		font-size: 16px;
-		opacity: 0.95;
-	}
+ExceptionNotification .symbol
+{
+	color: #ff97a3;
+	font-size: 16px;
+	opacity: 0.95;
+}
 
-	.title
-	{
-		font-size: 13px;
-		font-weight: 700;
-		color: $default-text-light;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow: hidden;
-		line-height: 16px;
-	}
+ExceptionNotification .title
+{
+	font-size: 13px;
+	font-weight: 700;
+	color: $default-text-light;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	line-height: 16px;
+}
 
-	.message
-	{
-		font-size: 12px;
-		line-height: 16px;
-		color: rgba( $default-text, 0.95 );
-		white-space: pre;
-	}
+ExceptionNotification .message
+{
+	font-size: 12px;
+	line-height: 16px;
+	color: rgba( $default-text, 0.95 );
+	white-space: pre;
+}
 
-	.trace-container
-	{
-		flex-direction: column;
-		max-height: 220px;
-		overflow-y: scroll;
-		background-color: rgba( $default-950, 0.62 );
-		border: 1px solid rgba( $default-border, 0.7 );
-		border-radius: $rounding-small;
-		padding: 7px 8px;
-		opacity: 1;
-		transform: translateY( 0px );
-		transition: opacity 0.16s ease, transform 0.16s ease, max-height 0.16s ease, margin 0.16s ease, padding 0.16s ease;
-	}
+ExceptionNotification .trace-container
+{
+	flex-direction: column;
+	max-height: 220px;
+	overflow-y: scroll;
+	background-color: rgba( $default-950, 0.62 );
+	border: 1px solid rgba( $default-border, 0.7 );
+	border-radius: $rounding-small;
+	padding: 7px 8px;
+	opacity: 1;
+	transform: translateY( 0px );
+	transition: opacity 0.16s ease, transform 0.16s ease, max-height 0.16s ease, margin 0.16s ease, padding 0.16s ease;
+}
 
-	.trace
-	{
-		font-size: 11px;
-		line-height: 15px;
-		color: $default-100;
-		white-space: pre;
-	}
+ExceptionNotification .trace
+{
+	font-size: 11px;
+	line-height: 15px;
+	color: $default-100;
+	white-space: pre;
+}
 
-	&:not(.has-trace) .trace-container
-	{
-		opacity: 0;
-		transform: translateY( 4px );
-		max-height: 0;
-		margin: 0;
-		padding-top: 0;
-		padding-bottom: 0;
-		border-width: 0;
-		pointer-events: none;
-		overflow: hidden;
-	}
+ExceptionNotification:not(.has-trace) .trace-container
+{
+	opacity: 0;
+	transform: translateY( 4px );
+	max-height: 0;
+	margin: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	border-width: 0;
+	pointer-events: none;
+	overflow: hidden;
 }

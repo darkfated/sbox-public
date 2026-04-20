@@ -1,121 +1,111 @@
-@import '/styles/_Theme.scss';
+@import '/styles/_theme.scss';
 
 ConsoleRow
 {
-    font-family: $font-default;
-    font-size: 12px;
-    flex-shrink: 0;
-    flex-grow: 0;
-    height: 20px;
-    width: 100%;
-    cursor: pointer;
-    align-items: center;
-    white-space: pre;
-    color: #919aab;
-    opacity: 0;
-    transform: translateY( 3px );
-    animation: console-row-in 0.12s ease-out forwards;
+	font-family: $font-default;
+	font-size: 12px;
+	flex-shrink: 0;
+	flex-grow: 0;
+	height: 20px;
+	width: 100%;
+	cursor: pointer;
+	align-items: center;
+	white-space: pre;
+	color: #919aab;
+	opacity: 0;
+	transform: translateY( 3px );
+	animation: console-row-in 0.12s ease-out forwards;
+}
 
-    .time
-    {
-        width: 68px;
-        justify-content: center;
-        margin-right: 5px;
-        background-color: rgba( $default-700, 0.45 );
-        color: $default-200;
-        padding: 1px 5px;
-        flex-shrink: 0;
-        flex-grow: 0;
-        white-space: nowrap;
+ConsoleRow .time
+{
+	width: 68px;
+	justify-content: center;
+	margin-right: 5px;
+	background-color: rgba( $default-700, 0.45 );
+	color: $default-200;
+	padding: 1px 5px;
+	flex-shrink: 0;
+	flex-grow: 0;
+	white-space: nowrap;
+}
 
-        > label
-        {
-            width: 100%;
-            text-align: center;
-            color: $default-200;
-        }
-    }
+ConsoleRow .time > label
+{
+	width: 100%;
+	text-align: center;
+	color: $default-200;
+}
 
-    .message
-    {
-        white-space: nowrap;
-    }
+ConsoleRow .message
+{
+	color: #919aab;
+	white-space: nowrap;
+}
 
-    &.Trace
-    {
-        opacity: 0.8;
-    }
+ConsoleRow.Trace
+{
+	opacity: 0.8;
+}
 
-    &.Warn
-    {
-        color: #ffd75d;
-    }
+ConsoleRow.Warn
+{
+	color: #ffd75d;
+}
 
-    &.Error
-    {
-        color: #ff6f7c;
-        background-color: rgba( #ff5a6a, 0.1 );
-    }
+ConsoleRow.Error
+{
+	color: #ff6f7c;
+	background-color: rgba( #ff5a6a, 0.1 );
+}
 
-    &:hover
-    {
-        background-color: rgba( $default-700, 0.45 );
-    }
+ConsoleRow:hover
+{
+	background-color: rgba( $default-700, 0.45 );
+}
 
-    &.in
-    {
-        color: $primary-blue;
-    }
+ConsoleRow.in
+{
+	color: $primary-blue;
+}
 
-    &.highlight
-    {
-        background-color: rgba( $primary-blue, 0.1 );
+ConsoleRow.highlight
+{
+	background-color: rgba( $primary-blue, 0.1 );
+	color: $default-text;
+}
 
-        color: $default-text;
-    }
+ConsoleRow.Warn .message
+{
+	color: #ffd75d;
+}
 
-    .message,
-    .message *
-    {
-        color: #919aab;
-    }
+ConsoleRow.Error .message
+{
+	color: #ff6f7c;
+}
 
-    &.Warn .message,
-    &.Warn .message *
-    {
-        color: #ffd75d;
-    }
+ConsoleRow.in .message
+{
+	color: $primary-blue;
+}
 
-    &.Error .message,
-    &.Error .message *
-    {
-        color: #ff6f7c;
-    }
-
-    &.in .message,
-    &.in .message *
-    {
-        color: $primary-blue;
-    }
-
-    &.highlight .message,
-    &.highlight .message *
-    {
-        color: $default-text;
-    }
+ConsoleRow.highlight .message
+{
+	color: $default-text;
 }
 
 @keyframes console-row-in
 {
-    from
-    {
-        opacity: 0;
-        transform: translateY( 3px );
-    }
+	from
+	{
+		opacity: 0;
+		transform: translateY( 3px );
+	}
 
-    to
-    {
-        opacity: 1;
-        transform: translateY( 0px );
-    }
+	to
+	{
+		opacity: 1;
+		transform: translateY( 0px );
+	}
 }

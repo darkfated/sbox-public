@@ -10,99 +10,118 @@ consoleoverlay
 	flex-direction: column;
 	font-family: $font-default;
 	pointer-events: none;
+}
 
-	.output
-	{
-		flex-direction: column;
-		align-items: flex-start;
-		flex-grow: 1;
-		overflow: hidden;
+consoleoverlay .output
+{
+	flex-direction: column;
+	align-items: flex-start;
+	flex-grow: 1;
+	overflow: hidden;
+}
 
-		ConsoleEntry
-		{
-			flex-shrink: 0;
-			width: 100%;
-			max-width: 980px;
-			min-height: 24px;
-			flex-direction: row;
-			align-items: center;
-			color: $default-200;
-			background-color: rgba( $default-950, 0.84 );
-			border: 1px solid rgba( $default-border, 0.75 );
-			pointer-events: auto;
-			overflow: hidden;
+consoleoverlay .output ConsoleEntry
+{
+	flex-shrink: 0;
+	width: 100%;
+	max-width: 980px;
+	min-height: 24px;
+	flex-direction: row;
+	align-items: center;
+	color: $default-200;
+	background-color: rgba( $default-950, 0.84 );
+	border: 1px solid rgba( $default-border, 0.75 );
+	pointer-events: auto;
+	overflow: hidden;
+}
 
-			label
-			{
-				padding: 3px 8px;
-				font-size: 10px;
-				font-weight: 600;
-				line-height: 14px;
-			}
+consoleoverlay .output ConsoleEntry label
+{
+	padding: 3px 8px;
+	font-size: 10px;
+	font-weight: 600;
+	line-height: 14px;
+}
 
-			.time
-			{
-				width: 68px;
-				margin-left: 4px;
-				align-items: center;
-				justify-content: center;
-				color: $default-200;
-				background-color: rgba( $default-800, 0.46 );
-				text-align: center;
+consoleoverlay .output ConsoleEntry .time
+{
+	width: 68px;
+	margin-left: 4px;
+	align-items: center;
+	justify-content: center;
+	color: $default-200;
+	background-color: rgba( $default-800, 0.46 );
+	text-align: center;
+}
 
-				> label
-				{
-					width: 100%;
-					padding: 3px 0;
-				}
-			}
+consoleoverlay .output ConsoleEntry .time > label
+{
+	width: 100%;
+	padding: 3px 0;
+}
 
-			.message
-			{
-				flex-grow: 1;
-				min-width: 0;
-				white-space: nowrap;
-				color: $default-200;
+consoleoverlay .output ConsoleEntry .message
+{
+	flex-grow: 1;
+	min-width: 0;
+	white-space: nowrap;
+	color: $default-200;
+}
 
-				> label
-				{
-					padding-left: 8px;
-					padding-right: 10px;
-				}
-			}
+consoleoverlay .output ConsoleEntry .message > label
+{
+	padding-left: 8px;
+	padding-right: 10px;
+}
 
-			&.Trace { opacity: 0.8; }
+consoleoverlay .output ConsoleEntry.Trace
+{
+	opacity: 0.8;
+}
 
-			&.Warn,
-			&.Warn .message,
-			&.Warn .message > label
-			{
-				color: #ffd75d;
-			}
+consoleoverlay .output ConsoleEntry.Warn
+{
+	color: #ffd75d;
+}
 
-			&.Error
-			{
-				background-color: rgba( #ff5a6a, 0.11 );
+consoleoverlay .output ConsoleEntry.Warn .message
+{
+	color: #ffd75d;
+}
 
-				&,
-				.message,
-				.message > label
-				{
-					color: #ff6f7c;
-				}
-			}
+consoleoverlay .output ConsoleEntry.Warn .message > label
+{
+	color: #ffd75d;
+}
 
-			&.in .message,
-			&.in .message > label
-			{
-				color: $primary-blue;
-			}
+consoleoverlay .output ConsoleEntry.Error
+{
+	background-color: rgba( #ff5a6a, 0.11 );
+	color: #ff6f7c;
+}
 
-			&:hover
-			{
-				background-color: rgba( $default-900, 0.95 );
-				border-color: $default-border;
-			}
-		}
-	}
+consoleoverlay .output ConsoleEntry.Error .message
+{
+	color: #ff6f7c;
+}
+
+consoleoverlay .output ConsoleEntry.Error .message > label
+{
+	color: #ff6f7c;
+}
+
+consoleoverlay .output ConsoleEntry.in .message
+{
+	color: $primary-blue;
+}
+
+consoleoverlay .output ConsoleEntry.in .message > label
+{
+	color: $primary-blue;
+}
+
+consoleoverlay .output ConsoleEntry:hover
+{
+	background-color: rgba( $default-900, 0.95 );
+	border-color: $default-border;
 }
