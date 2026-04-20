@@ -2,8 +2,12 @@
 @inherits Panel
 
 <root class="@classes">
-    <div class="close" onclick="@Hide"><i>close</i></div>
-    <div @ref="Output" class="message" AllowChildSelection="true" AcceptsFocus="true" @onkeypress="KeyPress">
+    <div class="header">
+        <div class="title">Log Event</div>
+        <div class="close" onclick="@Hide"><i>close</i></div>
+    </div>
+
+    <div @ref="Output" class="message" AllowChildSelection="true" AcceptsFocus="true">
         <div class="text">@message</div>
         <div class="stack">
             <label class="details">@(entry?.Stack ?? string.Empty)</label>
