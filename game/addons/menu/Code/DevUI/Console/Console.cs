@@ -40,7 +40,6 @@ public class Console : Panel
 		Output = AddChild<VirtualList>();
 		Output.AddClass( "console_output" );
 		Output.ItemHeight = 22;
-		Output.OverscanCount = 2;
 		Output.PreferScrollToBottom = true;
 		Output.OnCreateCell = ( Panel cell, object data ) =>
 		{
