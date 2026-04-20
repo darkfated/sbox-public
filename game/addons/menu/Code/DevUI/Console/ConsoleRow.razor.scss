@@ -2,50 +2,68 @@
 
 ConsoleRow
 {
-	font-family: $font-default;
-	font-size: 12px;
 	flex-shrink: 0;
 	flex-grow: 0;
-	height: 20px;
 	width: 100%;
-	cursor: pointer;
+	min-height: 22px;
+	padding: 1px 6px 1px 0;
 	align-items: center;
-	white-space: pre;
+	gap: 8px;
+	cursor: pointer;
+	font-family: $font-default;
+	font-size: 12px;
+	line-height: 16px;
 	color: #919aab;
+	background-color: transparent;
+	border-radius: $rounding-small;
 	opacity: 0;
-	transform: translateY( 3px );
+	transform: translateY( 2px );
 	animation: console-row-in 0.12s ease-out forwards;
+	overflow: hidden;
 }
 
 ConsoleRow .time
 {
-	width: 68px;
-	justify-content: center;
-	margin-right: 5px;
-	background-color: rgba( $default-700, 0.45 );
-	color: $default-200;
-	padding: 1px 5px;
 	flex-shrink: 0;
 	flex-grow: 0;
-	white-space: nowrap;
+	flex-basis: auto;
+	width: 76px;
+	min-width: 76px;
+	max-width: 76px;
+	min-height: 16px;
+	padding: 2px 6px;
+	align-items: center;
+	justify-content: center;
+	font-family: Roboto Mono;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 11px;
+	letter-spacing: 0.02em;
+	color: $default-200;
+	background-color: rgba( $default-700, 0.35 );
+	border: 1px solid rgba( $default-border, 0.55 );
+	border-radius: $rounding-small;
 }
 
 ConsoleRow .time > label
 {
-	width: 100%;
 	text-align: center;
 	color: $default-200;
 }
 
 ConsoleRow .message
 {
+	flex-grow: 1;
+	min-width: 0;
 	color: #919aab;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 ConsoleRow.Trace
 {
-	opacity: 0.8;
+	opacity: 0.72;
 }
 
 ConsoleRow.Warn
@@ -53,31 +71,15 @@ ConsoleRow.Warn
 	color: #ffd75d;
 }
 
-ConsoleRow.Error
-{
-	color: #ff6f7c;
-	background-color: rgba( #ff5a6a, 0.1 );
-}
-
-ConsoleRow:hover
-{
-	background-color: rgba( $default-700, 0.45 );
-}
-
-ConsoleRow.in
-{
-	color: $primary-blue;
-}
-
-ConsoleRow.highlight
-{
-	background-color: rgba( $primary-blue, 0.1 );
-	color: $default-text;
-}
-
 ConsoleRow.Warn .message
 {
 	color: #ffd75d;
+}
+
+ConsoleRow.Error
+{
+	color: #ff6f7c;
+	background-color: rgba( #ff5a6a, 0.08 );
 }
 
 ConsoleRow.Error .message
@@ -85,9 +87,19 @@ ConsoleRow.Error .message
 	color: #ff6f7c;
 }
 
+ConsoleRow.in
+{
+	color: $primary-blue;
+}
+
 ConsoleRow.in .message
 {
 	color: $primary-blue;
+}
+
+ConsoleRow.highlight
+{
+	background-color: rgba( $primary-blue, 0.1 );
 }
 
 ConsoleRow.highlight .message
@@ -95,12 +107,17 @@ ConsoleRow.highlight .message
 	color: $default-text;
 }
 
+ConsoleRow:hover
+{
+	background-color: rgba( $default-700, 0.18 );
+}
+
 @keyframes console-row-in
 {
 	from
 	{
 		opacity: 0;
-		transform: translateY( 3px );
+		transform: translateY( 2px );
 	}
 
 	to
