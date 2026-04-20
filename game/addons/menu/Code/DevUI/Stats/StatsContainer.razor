@@ -2,21 +2,21 @@
 @using Sandbox.UI.Dev.Stats
 @inherits Panel
 
-<root id="DeveloperMode"> 
-    <PerformanceStats></PerformanceStats>
-    <GarbageStats></GarbageStats>
-    <RenderStats></RenderStats>
-    <SceneStats></SceneStats>
-    
-    @if ( Networking.IsActive )
-    {
-	    <NetworkStats></NetworkStats>
-	    
-	    @if ( !Networking.IsHost )
-	    {
-		    <HostStats></HostStats>
-	    }
-    }
+<root class="stats-container">
+	<PerformanceStats />
+	<GarbageStats />
+	<RenderStats />
+	<SceneStats />
+
+	@if ( Networking.IsActive )
+	{
+		<NetworkStats />
+
+		@if ( !Networking.IsHost )
+		{
+			<HostStats />
+		}
+	}
 </root>
 
 @code
