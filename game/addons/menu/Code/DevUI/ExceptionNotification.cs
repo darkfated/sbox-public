@@ -4,18 +4,10 @@ namespace Sandbox.UI.Dev;
 
 public class ExceptionNotification : Panel
 {
-	class NoWheelPanel : Panel
-	{
-		public override void OnMouseWheel( Vector2 value )
-		{
-			// Disable wheel scrolling to match console behavior.
-		}
-	}
-
-	Label message;
-	Label trace;
-	Panel traceContainer;
-	RealTimeSince TimeSinceLastError;
+	private readonly Label message;
+	private readonly Label trace;
+	private readonly Panel traceContainer;
+	private RealTimeSince timeSinceLastError;
 
 	public ExceptionNotification()
 	{
@@ -27,51 +19,28 @@ public class ExceptionNotification : Panel
 		header.Add.Label( "Code Error", "title" );
 
 		message = content.Add.Label( "Something went wrong! This is an exception notice!", "message" );
-		traceContainer = content.AddChild<NoWheelPanel>();
-		traceContainer.AddClass( "trace-container" );
+		traceContainer = content.Add.Panel( "trace-container" );
 		trace = traceContainer.Add.Label( "", "trace" );
 		trace.Multiline = true;
 		trace.Selectable = true;
 		SetClass( "hidden", true );
-		TimeSinceLastError = 100;
+		timeSinceLastError = 100;
 	}
 
 	public override void Tick()
 	{
 		base.Tick();
 
-		SetClass( "hidden", TimeSinceLastError > 8 );
-		SetClass( "fresh", TimeSinceLastError < 0.2f );
+		SetClass( "hidden", timeSinceLastError > 8 );
+		SetClass( "fresh", timeSinceLastError < 0.2f );
 	}
 
 	internal void OnException( LogEvent entry )
 	{
-		message.Text = entry.Message?.Split( '\n', System.StringSplitOptions.RemoveEmptyEntries ).FirstOrDefault()?.Trim() ?? "null";
+		var lines = entry.Message?.Split( '\n', System.StringSplitOptions.RemoveEmptyEntries );
+		message.Text = lines is { Length: > 0 } ? lines[0].Trim() : "null";
 		trace.Text = string.IsNullOrWhiteSpace( entry.Stack ) ? entry.Message ?? string.Empty : entry.Stack;
 		SetClass( "has-trace", !string.IsNullOrWhiteSpace( trace.Text ) );
-		TimeSinceLastError = 0;
-	}
-
-	protected override void OnMouseDown( MousePanelEvent e )
-	{
-		base.OnMouseDown( e );
-		e.StopPropagation();
-	}
-
-	protected override void OnMouseMove( MousePanelEvent e )
-	{
-		base.OnMouseMove( e );
-		e.StopPropagation();
-	}
-
-	protected override void OnMouseUp( MousePanelEvent e )
-	{
-		base.OnMouseUp( e );
-		e.StopPropagation();
-	}
-
-	public override void OnMouseWheel( Vector2 value )
-	{
-		// Swallow wheel input so scrolling this panel doesn't scroll UI behind it.
+		timeSinceLastError = 0;
 	}
 }
