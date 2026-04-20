@@ -2,25 +2,34 @@
 @inherits Panel
 
 <root>
-    <div class="trigger" onclick="@ToggleMenu">
-        <i>@CurrentIcon</i>
-        <span>@CurrentTitle</span>
-    </div>
+    <div class="picker">
+        <div class="trigger" onmousedown="@ToggleMenu">
+            <i class="trigger-icon">@CurrentIcon</i>
+            <div class="trigger-copy">
+                <span class="eyebrow">Render Mode</span>
+                <span class="title">@CurrentTitle</span>
+            </div>
+            <i class="trigger-arrow">expand_more</i>
+        </div>
 
-    @if ( _menuOpen )
-    {
-        <div class="menu-overlay">
+        <div class=@($"menu-overlay {(_menuOpen ? "open" : "hidden")}")>
             @foreach ( var (mode, info) in DebugModes )
             {
                 var captured = mode;
                 var modeClass = mode == _selectedMode ? "mode-option active" : "mode-option";
-                <div class="@modeClass" onclick="@(() => SelectMode( captured ))">
-                    <i>@(info.Icon ?? "image")</i>
-                    <span>@(info.Name ?? captured.ToString())</span>
+                <div class="@modeClass" onmousedown="@(() => SelectMode( captured ))">
+                    <i class="mode-icon">@(info.Icon ?? "image")</i>
+                    <div class="mode-copy">
+                        <span class="title">@(info.Name ?? captured.ToString())</span>
+                        @if ( !string.IsNullOrWhiteSpace( info.Description ) )
+                        {
+                            <span class="meta">@info.Description</span>
+                        }
+                    </div>
                 </div>
             }
         </div>
-    }
+    </div>
 </root>
 
 
@@ -35,8 +44,9 @@
     SceneCameraDebugMode _selectedMode;
     bool _menuOpen;
 
-    string CurrentTitle => GetDisplayInfo().Name ?? _selectedMode.ToString();
-    string CurrentIcon => GetDisplayInfo().Icon ?? "image";
+    DisplayInfo CurrentInfo => GetDisplayInfo();
+    string CurrentTitle => CurrentInfo.Name ?? _selectedMode.ToString();
+    string CurrentIcon => CurrentInfo.Icon ?? "image";
 
     DisplayInfo GetDisplayInfo()
     {
@@ -57,7 +67,16 @@
     void ToggleMenu()
     {
         Sound.Play( "ui.button.press" );
-        _menuOpen = !_menuOpen;
+        if ( _menuOpen )
+        {
+            _menuOpen = false;
+            SetRenderModePickerOpen?.Invoke( false );
+            StateHasChanged();
+            return;
+        }
+
+        SyncFromConvar();
+        _menuOpen = true;
         SetRenderModePickerOpen?.Invoke( _menuOpen );
         StateHasChanged();
     }
@@ -69,6 +88,12 @@
         _menuOpen = false;
         SetRenderModePickerOpen?.Invoke( false );
         StateHasChanged();
+    }
+
+    void SyncFromConvar()
+    {
+        if ( TryGetModeFromConvar( out var convarMode ) )
+            _selectedMode = convarMode;
     }
 
     bool TryGetModeFromConvar( out SceneCameraDebugMode mode )
@@ -101,17 +126,19 @@
             StateHasChanged();
         }
 
-        var actual = _selectedMode;
-        if ( TryGetModeFromConvar( out var convarMode ) )
-            actual = convarMode;
-
-        if ( _selectedMode != actual )
+        if ( !_menuOpen )
         {
-            _selectedMode = actual;
-            StateHasChanged();
+            var actual = _selectedMode;
+            if ( TryGetModeFromConvar( out var convarMode ) )
+                actual = convarMode;
+
+            if ( _selectedMode != actual )
+            {
+                _selectedMode = actual;
+                StateHasChanged();
+            }
         }
 
-        SetClass( "active", _selectedMode != SceneCameraDebugMode.Normal );
         SetClass( "open", _menuOpen );
     }
 }

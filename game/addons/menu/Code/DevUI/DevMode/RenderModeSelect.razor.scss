@@ -1,59 +1,113 @@
-@import '/styles/_Theme.scss';
+@import '/styles/_theme.scss';
 
 RenderModeSelect
 {
 	position: relative;
 	width: 100%;
 	font-family: $font-default;
-	font-weight: bold;
-	font-size: 14px;
-	color: $default-text-light;
+	font-size: 12px;
+	color: $default-text;
+}
+
+RenderModeSelect .picker
+{
+	position: relative;
+	width: 100%;
 }
 
 RenderModeSelect .trigger
 {
 	width: 100%;
-	padding: 10px 14px;
-	cursor: pointer;
-	border-radius: $rounding-default;
-	border: 1px solid transparent;
-	background-color: rgba( $default-500, 0.08 );
-	color: $default-text-light;
+	padding: 10px 12px;
 	flex-direction: row;
 	align-items: center;
-	gap: 6px;
-	min-height: 40px;
+	gap: 10px;
+	cursor: pointer;
+	border-radius: $rounding-default;
+	border: 1px solid rgba( $default-border, 0.65 );
+	background-color: rgba( $default-900, 0.9 );
+	box-shadow: 0 8px 20px rgba( black, 0.15 );
+	transition: background-color 90ms $easing, border-color 90ms $easing, box-shadow 90ms $easing;
 }
 
-RenderModeSelect .trigger i
+RenderModeSelect .trigger-icon,
+RenderModeSelect .mode-icon
 {
+	flex-shrink: 0;
 	font-size: 16px;
-	opacity: 0.7;
+	color: $default-100;
+	opacity: 0.9;
 }
 
-RenderModeSelect:hover .trigger
+RenderModeSelect .trigger-copy
 {
-	border-color: $default-border;
-	background-color: rgba( $default-500, 0.15 );
+	flex-direction: column;
+	min-width: 0;
+	gap: 1px;
+}
+
+RenderModeSelect .mode-copy
+{
+	flex-direction: column;
+	min-width: 0;
+	gap: 2px;
+}
+
+RenderModeSelect .eyebrow
+{
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: $default-200;
+}
+
+RenderModeSelect .title
+{
+	min-width: 0;
+	font-size: 15px;
+	font-weight: 700;
 	color: $default-text;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-RenderModeSelect:hover .trigger i
+RenderModeSelect .meta
 {
-	opacity: 1;
+	min-width: 0;
+	font-size: 11px;
+	color: $default-200;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-RenderModeSelect.active .trigger
+RenderModeSelect .trigger-arrow
 {
-	border-color: rgba( $primary-blue, 0.6 );
-	background-color: rgba( $primary-blue, 0.3 );
-	color: $default-text;
+	margin-left: auto;
+	font-size: 18px;
+	color: $default-200;
+	opacity: 0.9;
+	transition: transform 90ms $easing, color 90ms $easing;
 }
 
+RenderModeSelect:hover .trigger,
 RenderModeSelect.open .trigger
 {
-	opacity: 0;
-	pointer-events: none;
+	border-color: rgba( $primary-blue, 0.7 );
+	background-color: rgba( $default-800, 0.96 );
+	box-shadow: 0 10px 24px rgba( black, 0.22 );
+}
+
+RenderModeSelect:hover .trigger-arrow,
+RenderModeSelect.open .trigger-arrow
+{
+	color: $default-text;
+}
+
+RenderModeSelect.open .trigger-arrow
+{
+	transform: rotate( 180deg );
 }
 
 RenderModeSelect .menu-overlay
@@ -61,49 +115,68 @@ RenderModeSelect .menu-overlay
 	position: absolute;
 	left: 0;
 	right: 0;
-	bottom: 0;
+	bottom: 100%;
 	z-index: 30;
-	padding: 0;
-	gap: 8px;
 	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 8px;
+	padding: 10px;
+	border-radius: $rounding-large;
+	border: 1px solid rgba( $default-border, 0.75 );
+	background-color: rgba( $default-900, 0.98 );
+	box-shadow: 0 16px 32px rgba( black, 0.3 );
+	opacity: 1;
+	transform: translateY( 0 );
+	transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+}
+
+RenderModeSelect .menu-overlay.hidden
+{
+	opacity: 0;
+	transform: translateY( 6px );
+	pointer-events: none;
+}
+
+RenderModeSelect .menu-overlay.open
+{
+	opacity: 1;
+	transform: translateY( 0 );
+	pointer-events: auto;
 }
 
 RenderModeSelect .mode-option
 {
 	width: 100%;
-	padding: 10px 14px;
+	padding: 10px 12px;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
 	cursor: pointer;
 	border-radius: $rounding-default;
 	border: 1px solid transparent;
-	background-color: rgba( $default-500, 0.08 );
-	color: $default-text-light;
-	flex-direction: row;
-	align-items: center;
-	gap: 6px;
-	min-height: 40px;
-}
-
-RenderModeSelect .mode-option i
-{
-	font-size: 16px;
-	opacity: 0.7;
+	background-color: rgba( $default-800, 0.3 );
+	transition: background-color 90ms $easing, border-color 90ms $easing, color 90ms $easing;
 }
 
 RenderModeSelect .mode-option:hover
 {
-	border-color: $default-border;
-	background-color: rgba( $default-500, 0.15 );
-	color: $default-text;
-}
-
-RenderModeSelect .mode-option:hover i
-{
-	opacity: 1;
+	border-color: rgba( $primary-blue, 0.6 );
+	background-color: rgba( $default-800, 0.7 );
 }
 
 RenderModeSelect .mode-option.active
 {
-	border-color: rgba( $primary-blue, 0.6 );
-	background-color: rgba( $primary-blue, 0.3 );
-	color: $default-text;
+	border-color: rgba( $primary-blue, 0.75 );
+	background-color: rgba( $primary-blue, 0.22 );
+}
+
+RenderModeSelect .mode-option .title
+{
+	font-size: 13px;
+	font-weight: 700;
+}
+
+RenderModeSelect .mode-option .meta
+{
+	font-size: 10px;
 }
