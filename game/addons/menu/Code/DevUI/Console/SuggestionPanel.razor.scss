@@ -1,0 +1,126 @@
+@import '/styles/_theme.scss';
+
+console .suggestionpanel
+{
+	position: absolute;
+	left: 12px;
+	width: 36%;
+	min-width: 360px;
+	max-width: 720px;
+	bottom: 50px;
+	z-index: 30;
+	flex-direction: column;
+	font-family: $font-default;
+	font-size: 12px;
+	pointer-events: auto;
+	background-color: $default-900;
+	color: $default-text;
+	border-radius: $rounding-default;
+	box-shadow: 0 6px 30px rgba( black, 0.45 );
+	outline: 1px solid $default-border;
+	padding: 12px 14px;
+	overflow: hidden;
+	min-height: 72px;
+	max-height: calc( 100vh - 130px );
+	transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+console .suggestionpanel.hidden
+{
+	opacity: 0;
+	transform: translateY( 6px );
+	pointer-events: none;
+}
+
+console .suggestionpanel .header
+{
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 4px 6px 10px 6px;
+	border-bottom: 1px solid rgba( $default-border, 0.35 );
+}
+
+console .suggestionpanel .header .title
+{
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: $default-text;
+	white-space: nowrap;
+}
+
+console .suggestionpanel .header .hint
+{
+	font-size: 12px;
+	font-weight: 600;
+	color: rgba( $default-200, 0.88 );
+	white-space: nowrap;
+}
+
+console .suggestionpanel .items
+{
+	flex-direction: column;
+	gap: 6px;
+	padding-top: 10px;
+	overflow: hidden;
+	min-height: 0;
+	flex-grow: 1;
+}
+
+console .suggestionpanel .suggestion-row
+{
+	width: 100%;
+	align-self: stretch;
+	min-height: 30px;
+	padding: 6px 10px;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	justify-content: flex-start;
+	text-align: left;
+	color: $default-text;
+	background-color: rgba( $default-700, 0.22 );
+	border: 1px solid rgba( $default-border, 0.18 );
+	border-radius: $rounding-small;
+	cursor: default;
+	overflow: hidden;
+	transition: all 150ms $easing;
+	font-family: $font-default;
+}
+
+console .suggestionpanel .suggestion-row.selected
+{
+	background-color: rgba( $primary-blue, 0.22 );
+	border-color: rgba( $primary-blue, 0.82 );
+}
+
+console .suggestionpanel .suggestion-row .title
+{
+	flex-grow: 0;
+	flex-shrink: 1;
+	min-width: 0;
+	font-size: 12px;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: $default-text;
+}
+
+console .suggestionpanel .suggestion-row .value
+{
+	flex-shrink: 0;
+	margin-left: 4px;
+	min-width: 0;
+	padding: 0;
+	font-size: 12px;
+	font-weight: 700;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: left;
+	color: #3273eb;
+}

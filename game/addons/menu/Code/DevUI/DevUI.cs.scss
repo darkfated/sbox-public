@@ -18,18 +18,4 @@ devlayer
 			display: none;
 		}
 	}
-
-	.popup-panel
-	{
-		pointer-events: all;
-		background-color: $default-900;
-		border: 1px solid $default-border;
-		border-radius: $rounding-default;
-		color: $default-text;
-
-		.button
-		{
-			font-size: $text-small;
-		}
-	}
 }

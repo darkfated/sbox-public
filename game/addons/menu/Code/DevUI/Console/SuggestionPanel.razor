@@ -1,0 +1,196 @@
+@namespace Sandbox.UI.Dev
+@inherits Panel
+
+<root class="@classes">
+    <div class="header">
+        <div class="title">Suggestions</div>
+        <div class="hint">@Hint</div>
+    </div>
+
+    <div class="items">
+        @for ( var i = 0; i < Items.Count; i++ )
+        {
+            var item = Items[i];
+            <row class="@RowClasses( i )">
+                <div class="title">@item.Title</div>
+                <div class="value">@item.Meta</div>
+            </row>
+        }
+    </div>
+</root>
+
+@code
+{
+    public struct SuggestionEntry
+    {
+        public string Title;
+        public string Value;
+        public string Command;
+        public string Meta;
+    }
+
+    public ConsoleInput Input { get; set; }
+
+    const int MaxSuggestions = 20;
+    readonly List<SuggestionEntry> items = new();
+    public List<SuggestionEntry> Items => items;
+
+    public bool Visible { get; private set; }
+    int SelectedIndex = -1;
+    public string Hint { get; private set; } = "Start typing";
+
+    string classes => $"suggestionpanel {(Visible ? "visible" : "hidden")}";
+    public bool HasItems => Visible && Items.Count > 0;
+
+    public void Update( string text, Func<string, object[]> provider )
+    {
+        if ( provider == null )
+        {
+            Hide();
+            return;
+        }
+
+        var options = provider( text ) ?? Array.Empty<object>();
+        if ( options.Length == 0 )
+        {
+            Hide();
+            return;
+        }
+
+        items.Clear();
+        SelectedIndex = -1;
+
+        var visibleCount = 0;
+        foreach ( var option in options )
+        {
+            if ( visibleCount >= MaxSuggestions )
+                break;
+
+            var item = ConvertOption( option );
+            if ( string.IsNullOrWhiteSpace( item.Value ) )
+                continue;
+
+            item.Meta = FormatSuggestionValue( string.IsNullOrWhiteSpace( item.Command ) ? null : ConsoleSystem.GetValue( item.Command ) );
+            items.Add( item );
+
+            visibleCount++;
+        }
+
+        if ( items.Count == 0 )
+        {
+            Hide();
+            return;
+        }
+
+        SelectedIndex = -1;
+        Hint = items.Count == 1 ? "1 match" : $"{items.Count} matches";
+        Visible = true;
+        SetClass( "hidden", false );
+        StateHasChanged();
+    }
+
+    public void Hide()
+    {
+        Visible = false;
+        SelectedIndex = -1;
+        items.Clear();
+        SetClass( "hidden", true );
+        StateHasChanged();
+    }
+
+    public void MoveSelection( int direction )
+    {
+        if ( Items.Count == 0 )
+            return;
+
+        if ( SelectedIndex < 0 )
+            SelectedIndex = direction > 0 ? 0 : Items.Count - 1;
+        else
+            SelectedIndex = (SelectedIndex + direction + Items.Count) % Items.Count;
+
+        StateHasChanged();
+    }
+
+    public string GetSelectedValue()
+    {
+        if ( SelectedIndex < 0 || SelectedIndex >= Items.Count )
+            return string.Empty;
+
+        return Items[SelectedIndex].Value;
+    }
+
+    string RowClasses( int index )
+    {
+        var classes = "suggestion-row";
+
+        if ( index == SelectedIndex )
+            classes += " selected";
+
+        return classes;
+    }
+
+    SuggestionEntry ConvertOption( object option )
+    {
+        if ( option is TextEntry.AutocompleteEntry entry )
+        {
+            var value = entry.Value?.ToString() ?? string.Empty;
+            return new SuggestionEntry
+            {
+                Title = string.IsNullOrWhiteSpace( entry.Title ) ? value : entry.Title,
+                Value = value,
+                Command = ExtractFirstToken( value )
+            };
+        }
+
+        var raw = option?.ToString() ?? string.Empty;
+        return new SuggestionEntry
+        {
+            Title = raw,
+            Value = raw,
+            Command = ExtractFirstToken( raw )
+        };
+    }
+
+    static string ExtractFirstToken( string value )
+    {
+        if ( string.IsNullOrWhiteSpace( value ) )
+            return string.Empty;
+
+        var trimmed = value.TrimStart();
+        var separator = trimmed.IndexOf( ' ' );
+        return separator < 0 ? trimmed : trimmed[..separator];
+    }
+
+    static string FormatSuggestionValue( string rawValue )
+    {
+        if ( TryParseBoolToken( rawValue, out var boolValue ) )
+            return boolValue ? "True" : "False";
+
+        return rawValue ?? string.Empty;
+    }
+
+    static bool TryParseBoolToken( string value, out bool result )
+    {
+        if ( string.IsNullOrWhiteSpace( value ) )
+        {
+            result = false;
+            return false;
+        }
+
+        var raw = value.Trim();
+        if ( raw == "1" )
+        {
+            result = true;
+            return true;
+        }
+
+        if ( raw == "0" )
+        {
+            result = false;
+            return true;
+        }
+
+        result = false;
+        return false;
+    }
+}

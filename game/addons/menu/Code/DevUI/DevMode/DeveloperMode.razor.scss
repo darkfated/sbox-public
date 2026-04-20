@@ -54,39 +54,3 @@ DeveloperMode > .right
     flex-direction: column;
     gap: 12px;
 }
-
-.popup-panel
-{
-    padding: 4px;
-    gap: 2px;
-
-    .button
-    {
-        background-color: rgba( $default-800, 0.85 );
-        border-radius: $rounding-small;
-        color: $default-text;
-
-        &:nth-child( even )
-        {
-            background-color: rgba( $default-900, 0.9 );
-        }
-
-        &:hover, &.active
-        {
-            background-color: rgba( $primary-blue, 0.8 );
-
-
-            &:nth-child( even )
-            {
-                background-color: rgba( $primary-blue, 0.65 );
-            }
-        }
-
-        .iconpanel
-        {
-            color: $default-text;
-            opacity: 0.5;
-            margin-right: 10px;
-        }
-    }
-}

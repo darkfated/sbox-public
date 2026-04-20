@@ -6,6 +6,7 @@ public class Console : Panel
 	internal List<LogEvent> Entries = new();
 	internal VirtualList Output;
 	internal ConsoleInput Input;
+	internal SuggestionPanel SuggestionsPanel;
 	internal TextEntry Filter;
 	readonly List<object> filteredEntries = new();
 
@@ -50,6 +51,7 @@ public class Console : Panel
 		};
 
 		logEventPanel = AddChild<LogEventPanel>();
+		SuggestionsPanel = AddChild<SuggestionPanel>();
 
 		var toolbar = Add.Panel( "toolbar" );
 		{
@@ -58,6 +60,8 @@ public class Console : Panel
 			Input.Placeholder = "Run command";
 			Input.SuggestionProvider = Input.FillAutoComplete;
 			Input.HistoryCookie = "console-input-history";
+			Input.SuggestionsPanel = SuggestionsPanel;
+			SuggestionsPanel.Input = Input;
 
 			Filter = toolbar.AddChild<TextEntry>();
 			Filter.AddClass( "filter" );
@@ -204,17 +208,6 @@ public class Console : Panel
 		Input.AddToHistory( t );
 		ClearInput();
 		Input.FocusInput();
-	}
-
-	void ExecuteSubmittedLine( string line )
-	{
-		if ( line == "clear" )
-		{
-			OnClear();
-			return;
-		}
-
-		OutputLine( line );
 	}
 
 	void ClearInput()
