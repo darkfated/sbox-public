@@ -176,38 +176,32 @@ public class Console : Panel
 
 	void OnSubmit()
 	{
-		var t = Input.Text;
-		if ( string.IsNullOrWhiteSpace( t ) )
+		var command = Input.Text?.Trim();
+		if ( string.IsNullOrWhiteSpace( command ) )
 		{
 			ClearInput();
 			return;
 		}
 
-		if ( t == "clear" )
+		if ( command == "clear" )
 		{
 			OnClear();
 		}
 		else
 		{
-			if ( t.Contains( '\n' ) || t.Contains( '\r' ) )
-			{
-				var parts = t.Split( new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries );
-				foreach ( var part in parts )
-				{
-					OutputLine( part );
-				}
-			}
-			else
-			{
-				OutputLine( t );
-			}
+			OutputLine( command );
 		}
 
+		RecordHistory( command );
 		Output.TryScrollToBottom();
-
-		Input.AddToHistory( t );
 		ClearInput();
 		Input.FocusInput();
+	}
+
+	void RecordHistory( string command )
+	{
+		Input.AddToHistory( command );
+		Input.AddCommandHistory( command );
 	}
 
 	void ClearInput()

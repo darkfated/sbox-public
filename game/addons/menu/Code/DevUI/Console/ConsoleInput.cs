@@ -5,9 +5,14 @@ public class ConsoleInput : TextEntry
 	public SuggestionPanel SuggestionsPanel { get; set; }
 	public Func<string, object[]> SuggestionProvider { get; set; }
 
+	const int MaxHistorySuggestions = 10;
+	readonly List<string> commandHistory = new();
+	int historyIndex = -1;
+	bool historyCycling;
+
 	public override void OnButtonEvent( ButtonEvent e )
 	{
-		if ( e.Button == "tab" && SuggestionsPanel?.HasItems == true )
+		if ( e.Button == "tab" && ( SuggestionsPanel?.HasItems == true || CanCycleHistory() ) )
 		{
 			e.StopPropagation = true;
 			return;
@@ -20,6 +25,13 @@ public class ConsoleInput : TextEntry
 	{
 		if ( e.Button == "tab" )
 		{
+			if ( CanCycleHistory() )
+			{
+				e.StopPropagation = true;
+				CycleHistory( 1 );
+				return;
+			}
+
 			if ( SuggestionsPanel?.HasItems == true )
 			{
 				e.StopPropagation = true;
@@ -55,6 +67,7 @@ public class ConsoleInput : TextEntry
 	public override void OnValueChanged()
 	{
 		base.OnValueChanged();
+		StopHistoryCycling();
 		SuggestionsPanel?.Update( Text, SuggestionProvider );
 	}
 
@@ -67,6 +80,7 @@ public class ConsoleInput : TextEntry
 	protected override void OnBlur( PanelEvent e )
 	{
 		base.OnBlur( e );
+		StopHistoryCycling();
 		SuggestionsPanel?.Hide();
 	}
 
@@ -76,6 +90,7 @@ public class ConsoleInput : TextEntry
 	{
 		Text = string.Empty;
 		CaretPosition = 0;
+		StopHistoryCycling();
 		SuggestionsPanel?.Hide();
 		OnValueChanged();
 		StateHasChanged();
@@ -88,9 +103,53 @@ public class ConsoleInput : TextEntry
 
 		Text = value;
 		CaretPosition = TextLength;
+		StopHistoryCycling();
 		if ( refreshSuggestions )
 			OnValueChanged();
 		Focus();
+	}
+
+	public void AddCommandHistory( string command )
+	{
+		if ( string.IsNullOrWhiteSpace( command ) )
+			return;
+
+		command = command.Trim();
+
+		commandHistory.RemoveAll( x => x.Equals( command, StringComparison.OrdinalIgnoreCase ) );
+		commandHistory.Insert( 0, command );
+
+		while ( commandHistory.Count > MaxHistorySuggestions )
+			commandHistory.RemoveAt( commandHistory.Count - 1 );
+	}
+
+	bool CanCycleHistory()
+	{
+		return historyCycling || ( string.IsNullOrWhiteSpace( Text ) && commandHistory.Count > 0 );
+	}
+
+	void StopHistoryCycling()
+	{
+		historyCycling = false;
+		historyIndex = -1;
+	}
+
+	void CycleHistory( int direction )
+	{
+		if ( !CanCycleHistory() )
+			return;
+
+		if ( !historyCycling )
+		{
+			historyCycling = true;
+			historyIndex = -1;
+		}
+
+		historyIndex = ( historyIndex + direction + commandHistory.Count ) % commandHistory.Count;
+		Text = commandHistory[historyIndex];
+		CaretPosition = TextLength;
+		SuggestionsPanel?.Hide();
+		StateHasChanged();
 	}
 
 	public object[] FillAutoComplete( string arg )
